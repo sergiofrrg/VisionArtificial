@@ -19,6 +19,7 @@ using namespace std;
 int main()
 {
 
+
    cv::Mat_<uchar> image;
    cv::Mat_<uchar> image2;
    cv::ORB orb (100,1.2f,8,31,0,2,cv::ORB::HARRIS_SCORE,31);
