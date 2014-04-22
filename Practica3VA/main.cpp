@@ -32,7 +32,6 @@ int main()
 
    //cv::Mat conjuntoKeyPoints;
 
-   vector< vector<InfoKeyPoint> > conjuntoInfoKeyPoints;
    vector<InfoKeyPoint> listaInfoKeyPoints;
 
    for(int i=1; i<=48; i++){
@@ -61,21 +60,10 @@ int main()
        //ALMACENAMOS LA DIRECCIÓN AL CENTRO DE CADA KEYPOINT DE LA IMAGEN Y EL PROPIO KEYPOINT
        //en vectorInfoKP (y este a su vez en conjuntoInfoKeyPoints)
        for (int j=0; j<kp.size(); j++){
-           //vectorPuntos.push_back(cv::Point(centro.x-kp.at(j).pt.x,centro.y-kp.at(j).pt.y));
-           vectorInfoKP.push_back(InfoKeyPoint(kp.at(j),
-                                               cv::Point(centro.x-kp.at(j).pt.x,
-                                                         centro.y-kp.at(j).pt.y)));
           listaInfoKeyPoints.push_back(InfoKeyPoint(kp.at(j),
                                                cv::Point(centro.x-kp.at(j).pt.x,
                                                          centro.y-kp.at(j).pt.y)));
-
-           /*cout << "imagen: " << i << ", tamaño: " << image.cols << "x" << image.rows << ", "
-                   << "kp número: " << j << ", punto: " << vectorInfoKP.at(j).getKeyPoint().pt << endl; */
        }
-
-       //dirCentro.push_back(vectorPuntos);
-
-       conjuntoInfoKeyPoints.push_back(vectorInfoKP);
 
        //ALMACENAMOS LA MATRIZ DE DESCRIPTORES DE LA IMAGEN i EN LA MATRIZ conjuntoDescriptores
        conjuntoDescriptores.push_back(descriptoresImagen);
@@ -121,7 +109,6 @@ int main()
    cout << "descriptores Imagen Test: "<< endl << descriptoresImagen << endl;
    cout << "tamaño descriptores img test: " << descriptoresImagen.rows << "x" << descriptoresImagen.cols << endl;
    cout << "tamaño matriz descriptores aprendizaje: " << conjuntoDescriptores.rows << "x" << conjuntoDescriptores.cols << endl;
-   cout << "tamaño vector de vectores infoKeyPoints: " << conjuntoInfoKeyPoints.size() << endl;
    cout << "tamaño lista infoKeyPoints: " << listaInfoKeyPoints.size();
 
    //CREAMOS MATRIZ DE VOTACIÓN DEL TAMAÑO DE LA IMAGEN/bajaRes Y LO LLENAMOS DE 0s
@@ -137,98 +124,56 @@ int main()
    }
 
    int escalaImagenTest = kp.at(0).size;
-   //cout << escalaImagenTest;
 
+   //cout << escalaImagenTest;
 
    //OBTENEMOS LOS INFOKEYPOINTS DE APRENDIZAJE CORRESPONDIENTES A LOS DESCRIPTORES DE
    //APRENDIZAJE MÁS PARECIDOS A LOS DE LA IMAGEN TEST
 
-   //Segundo intento
-   /*for (int k = 0; k<indices.cols; k++){
-       for (int poskp = 0; poskp<indices.col(k).rows; poskp++){
-           //Guardamos el keypoint de la imagen aprendizaje k y su dircentro
-           InfoKeyPoint infoKpAux = conjuntoInfoKeyPoints.row(indices.row(poskp).row(k));
-           cv::KeyPoint kpAux = infoKpAux.getKeyPoint();
-           cv::Point dirCentroAux = infoKpAux.getVectorCentro();
-
-           //Modificamos la escala de donde supuestamente está el centro comparando la de la
-           //imagen test con la de la imagen de aprendizaje (de cualquiera de sus keypoints)
-           int escalaAprendizajeImagenK = kpAux.size;
-           dirCentroAux.x = dirCentroAux.x * (escalaImagenTest/escalaAprendizajeImagenK);
-           dirCentroAux.y = dirCentroAux.y * (escalaImagenTest/escalaAprendizajeImagenK);
-
-           //Le sumamos el dirCentroAux al keyPoint actual de la imagen test para obtener el
-           //supuesto centro
-           cv::Point votoCentro;
-           votoCentro.x = kp.at(poskp).pt.x + dirCentroAux.x;
-           votoCentro.y = kp.at(poskp).pt.y + dirCentroAux.y;
-
-           //Votamos dividiendo las coordenadas entre bajaRes
-           matVotacion[votoCentro.x/bajaRes][votoCentro.y/bajaRes] ++;
-       }
-   }
-   */
-
    //Tercer intento
-/*
+   int contadorKP = 0;
    for (cv::Mat_<int>::iterator it = indices.begin(); it!=indices.end(); it++){
-       InfoKeyPoint infoKpAux = conjuntoInfoKeyPoints.at(*it);
+       if (contadorKP>=kp.size())
+           contadorKP = 0;
+
+       //Guardamos el keypoint de la imagen aprendizaje k y su dircentro
+       InfoKeyPoint infoKpAux = listaInfoKeyPoints.at(*it);
+       cv::KeyPoint kpAux = infoKpAux.getKeyPoint();
+       cv::Point dirCentroAux = infoKpAux.getVectorCentro();
+
+       //Modificamos la escala de donde supuestamente está el centro comparando la de la
+       //imagen test con la de la imagen de aprendizaje (de cualquiera de sus keypoints)
+       int escalaAprendizajeImagenK = kpAux.size;
+       dirCentroAux.x = dirCentroAux.x * (escalaImagenTest/escalaAprendizajeImagenK);
+       dirCentroAux.y = dirCentroAux.y * (escalaImagenTest/escalaAprendizajeImagenK);
+
+       //Le sumamos el dirCentroAux al keyPoint actual de la imagen test para obtener el
+       //supuesto centro
+       cv::Point votoCentro;
+       votoCentro.x = kp.at(contadorKP).pt.x + dirCentroAux.x;
+       votoCentro.y = kp.at(contadorKP).pt.y + dirCentroAux.y;
+
+       //Votamos dividiendo las coordenadas entre bajaRes
+       matVotacion[votoCentro.x/bajaRes][votoCentro.y/bajaRes] ++;
    }
+
+
+   //DESPUÉS DE LA VOTACIÓN, BUSCAMOS EL PUNTO QUE TIENE MÁS VOTOS
 
    int valorMayor = 0;
    cv::Point centroFinal;
 
+   cout << "matriz votación final: " << endl;
    for (int i = 0; i<image3.cols/bajaRes; i++){
        for (int j = 0; j<image3.rows/bajaRes; j++){
-           cout << matVotacion[i][j]<<endl;
+           cout << matVotacion[i][j] << " ";
            if (matVotacion[i][j]>valorMayor){
                valorMayor = matVotacion[i][j];
                centroFinal.x = j*bajaRes;
                centroFinal.y = i*bajaRes;
            }
        }
-   }*/
-
-   //Primer intento
-   /* for (int fila=0; fila<indices.rows; fila++){
-       //ss << endl << indices.row(fila) << endl ;
-       vector<cv::KeyPoint> vecAux = keyPoints.at(indices.col(0).at(fila));
-       vector<cv::Point> dirAlCentroAux = dirCentro.at(indices.col(0).at(fila));
-       cout << "aqui" << fila << endl;
-
-       for (int pos = 0; pos < vecAux.size(); pos++){
-           cv::Point alCentroAux = dirAlCentroAux.at(pos);
-           float escalaAprendizaje = vecAux.at(pos).size;
-           float escalaTest = kp.at(0).size;
-           if (escalaAprendizaje != escalaTest){
-               alCentroAux.x = alCentroAux.x * (escalaTest/escalaAprendizaje);
-               alCentroAux.y = alCentroAux.y * (escalaTest/escalaAprendizaje);
-           }
-           cv::Point centroCoche = vecAux.at(pos).pt;
-           centroCoche.x += alCentroAux.x;
-           centroCoche.y += alCentroAux.y;
-           cout << centroCoche.x/bajaRes << " " << centroCoche.y/bajaRes << endl;
-           matVotacion[centroCoche.x/bajaRes][centroCoche.y/bajaRes] ++;
-       }
+       cout << endl;
    }
-
-   //DESPUÉS DE LA VOTACIÓN, OBTENEMOS EL CENTRO
-
-           //Le sumamos el dirCentroAux al keyPoint actual de la imagen test para obtener el
-           //supuesto centro
-           cv::Point votoCentro;
-           votoCentro.x = kp.at(poskp).pt.x + dirCentroAux.x;
-           votoCentro.y = kp.at(poskp).pt.y + dirCentroAux.y;
-
-           //Votamos dividiendo las coordenadas entre bajaRes
-           matVotacion[votoCentro.x/bajaRes][votoCentro.y/bajaRes] ++;
-
    cout << centroFinal << endl;
-   cout << image3.rows << " " << image3.cols << endl;
-   //cv::imshow("image3", image3);
-   //cv::waitKey();
-
-   //cout << ss.str();
-
-*/
 }
