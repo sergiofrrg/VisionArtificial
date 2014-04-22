@@ -20,7 +20,7 @@ using namespace std;
 int main()
 {
    cv::Mat_<uchar> image;
-   cv::ORB orb (10,1.2f,8,31,0,2,cv::ORB::HARRIS_SCORE,31);
+   cv::ORB orb (100,1.2f,8,31,0,2,cv::ORB::HARRIS_SCORE,31);
    cv::Mat_<uchar> descriptoresImagen;
    cv::Mat_< cv::Mat_<uchar> > conjuntoDescriptores;
    vector<std::vector<cv::KeyPoint> > keyPoints;
@@ -53,10 +53,6 @@ int main()
        //GUARDAMOS EL CENTRO DE LA IMAGEN
        centro=cv::Point(image.cols/2, image.rows/2);
 
-       //vector<cv::Point> vectorPuntos;
-
-       std::vector<InfoKeyPoint> vectorInfoKP; //si esto en vez de un vector pones que sea cv::Mat, dice que memory corruption
-
        //ALMACENAMOS LA DIRECCIÓN AL CENTRO DE CADA KEYPOINT DE LA IMAGEN Y EL PROPIO KEYPOINT
        //en vectorInfoKP (y este a su vez en conjuntoInfoKeyPoints)
        for (int j=0; j<kp.size(); j++){
@@ -67,17 +63,6 @@ int main()
 
        //ALMACENAMOS LA MATRIZ DE DESCRIPTORES DE LA IMAGEN i EN LA MATRIZ conjuntoDescriptores
        conjuntoDescriptores.push_back(descriptoresImagen);
-
-       /* Esto ya no nos sirve --------------
-       //ALMACENAMOS EL VECTOR DE KEYPOINTS DE LA IMAGEN i EN LA MATRIZ conjuntoKeyPoints
-       conjuntoKeyPoints.push_back(kp);
-
-       //keyPoints.push_back(kp);
-       //cv::drawKeypoints(image, kp, image2 );
-       //cv::imshow("Practica",image2);
-       //cv::waitKey(0);
-       --------------------------------------*/
-
    }
 
 
@@ -90,9 +75,6 @@ int main()
 
    image3=cv::imread("/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/TestCars/Test/test1.jpg",0);
 
-   //cv::imshow("image3", image3);
-   //cv::waitKey();
-
    //HALLAMOS LOS KEYPOINTS Y DESCRIPTORES DE LA IMAGEN DE TEST
    orb.detect(image3, kp);
    orb.compute(image3,kp,descriptoresImagen);
@@ -103,7 +85,6 @@ int main()
    cv::Mat dist;
    i.knnSearch(descriptoresImagen, indices, dist, k);
 
-   //cout << "index: " << endl << i. << endl;
    cout << "indices: " << endl << indices << endl;
    cout << "número de keypoints imagen test: " << endl << kp.size() << endl;
    cout << "descriptores Imagen Test: "<< endl << descriptoresImagen << endl;
@@ -115,17 +96,12 @@ int main()
    int bajaRes = 10;
    int matVotacion[image3.cols/bajaRes][image3.rows/bajaRes];
    for (int i = 0; i<image3.cols/bajaRes; i++){
-       //cout << i << " - ";
        for (int j = 0; j<image3.rows/bajaRes; j++){
            matVotacion[i][j] = 0;
-           //cout << matVotacion[i][j];
        }
-       //cout << endl;
    }
 
    int escalaImagenTest = kp.at(0).size;
-
-   //cout << escalaImagenTest;
 
    //OBTENEMOS LOS INFOKEYPOINTS DE APRENDIZAJE CORRESPONDIENTES A LOS DESCRIPTORES DE
    //APRENDIZAJE MÁS PARECIDOS A LOS DE LA IMAGEN TEST
@@ -158,8 +134,9 @@ int main()
 
        cout << "iteración: " << contadorKP << " Indice: " << *it << " Voto al punto: " << votoCentro << endl;
 
-       //Votamos dividiendo las coordenadas entre bajaRes
-       matVotacion[votoCentro.x/bajaRes][votoCentro.y/bajaRes] ++;
+       //Votamos dividiendo las coordenadas entre bajaRes si no busca en un punto fuera de la imagen
+       if ((votoCentro.x <= image3.cols) && (votoCentro.y <= image3.rows))
+            matVotacion[votoCentro.x/bajaRes][votoCentro.y/bajaRes] ++;
 
        contadorColumna ++;
    }
