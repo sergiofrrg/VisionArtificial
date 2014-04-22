@@ -98,7 +98,7 @@ int main()
    orb.compute(image3,kp,descriptoresImagen);
 
    //BUSCAMOS LOS k VECINOS MÁS CERCANOS A LOS DESCRIPTORES DE LA IMAGEN DE TEST EN descriptoresImagen
-   int k = 3;
+   int k = 10;
    cv::Mat_<int> indices;
    cv::Mat dist;
    i.knnSearch(descriptoresImagen, indices, dist, k);
@@ -130,11 +130,14 @@ int main()
    //OBTENEMOS LOS INFOKEYPOINTS DE APRENDIZAJE CORRESPONDIENTES A LOS DESCRIPTORES DE
    //APRENDIZAJE MÁS PARECIDOS A LOS DE LA IMAGEN TEST
 
-   //Tercer intento
    int contadorKP = 0;
+   int contadorColumna = 1;
+
    for (cv::Mat_<int>::iterator it = indices.begin(); it!=indices.end(); it++){
-       if (contadorKP>=kp.size())
-           contadorKP = 0;
+       if (contadorColumna > k){
+           contadorKP ++;
+           contadorColumna = 1;
+       }
 
        //Guardamos el keypoint de la imagen aprendizaje k y su dircentro
        InfoKeyPoint infoKpAux = listaInfoKeyPoints.at(*it);
@@ -153,8 +156,12 @@ int main()
        votoCentro.x = kp.at(contadorKP).pt.x + dirCentroAux.x;
        votoCentro.y = kp.at(contadorKP).pt.y + dirCentroAux.y;
 
+       cout << "iteración: " << contadorKP << " Indice: " << *it << " Voto al punto: " << votoCentro << endl;
+
        //Votamos dividiendo las coordenadas entre bajaRes
        matVotacion[votoCentro.x/bajaRes][votoCentro.y/bajaRes] ++;
+
+       contadorColumna ++;
    }
 
 
