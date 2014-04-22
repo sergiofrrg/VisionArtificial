@@ -33,6 +33,7 @@ int main()
    //cv::Mat conjuntoKeyPoints;
 
    vector< vector<InfoKeyPoint> > conjuntoInfoKeyPoints;
+   vector<InfoKeyPoint> listaInfoKeyPoints;
 
    for(int i=1; i<=48; i++){
        //ss << "/home/sergiofrrg/Documentos/OPENCV/training/frontal_" << i << ".jpg";
@@ -62,6 +63,9 @@ int main()
        for (int j=0; j<kp.size(); j++){
            //vectorPuntos.push_back(cv::Point(centro.x-kp.at(j).pt.x,centro.y-kp.at(j).pt.y));
            vectorInfoKP.push_back(InfoKeyPoint(kp.at(j),
+                                               cv::Point(centro.x-kp.at(j).pt.x,
+                                                         centro.y-kp.at(j).pt.y)));
+          listaInfoKeyPoints.push_back(InfoKeyPoint(kp.at(j),
                                                cv::Point(centro.x-kp.at(j).pt.x,
                                                          centro.y-kp.at(j).pt.y)));
 
@@ -114,7 +118,11 @@ int main()
    //cout << "index: " << endl << i. << endl;
    cout << "indices: " << endl << indices << endl;
    cout << "número de keypoints imagen test: " << endl << kp.size() << endl;
-   cout << "descriptores Imagen Test: "<< endl << descriptoresImagen;
+   cout << "descriptores Imagen Test: "<< endl << descriptoresImagen << endl;
+   cout << "tamaño descriptores img test: " << descriptoresImagen.rows << "x" << descriptoresImagen.cols << endl;
+   cout << "tamaño matriz descriptores aprendizaje: " << conjuntoDescriptores.rows << "x" << conjuntoDescriptores.cols << endl;
+   cout << "tamaño vector de vectores infoKeyPoints: " << conjuntoInfoKeyPoints.size() << endl;
+   cout << "tamaño lista infoKeyPoints: " << listaInfoKeyPoints.size();
 
    //CREAMOS MATRIZ DE VOTACIÓN DEL TAMAÑO DE LA IMAGEN/bajaRes Y LO LLENAMOS DE 0s
    int bajaRes = 10;
