@@ -2,7 +2,8 @@ TEMPLATE = app
 CONFIG += console
 CONFIG -= qt
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    infokeypoint.cpp
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../usr/local/lib/release/ -lopencv_core
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../usr/local/lib/debug/ -lopencv_core
@@ -52,3 +53,6 @@ else:unix: LIBS += -L$$PWD/../../../../usr/local/lib/ -lopencv_legacy
 
 INCLUDEPATH += $$PWD/../../../../usr/local/lib
 DEPENDPATH += $$PWD/../../../../usr/local/lib
+
+HEADERS += \
+    infokeypoint.h
