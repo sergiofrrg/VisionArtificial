@@ -14,8 +14,10 @@
 #include <list>
 #include <string.h>
 #include <infokeypoint.h>
+#include <opencv2/objdetect/objdetect.hpp>
 
 using namespace std;
+using namespace cv;
 
 int main()
 {
@@ -160,4 +162,74 @@ int main()
        cout << endl;
    }
    cout << centroFinal << endl;
+
+   //AQUI COMIENZA LO DEL HAAR
+
+   void detectAndDisplay( cv::Mat frame );
+
+   cv::String car_cascade_name = "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/haar/coches.xml";
+   cv::CascadeClassifier car_cascade;
+   string window_name = "Car Detection";
+   cv::RNG rng(12345);
+
+   CvCapture* capture;
+   cv::Mat frame;
+
+   //-- 1. Load the cascades
+   if( !car_cascade.load( car_cascade_name ) ){ printf("--(!)Error loading\n"); return -1; };
+
+
+    //-- 2. Read the video stream
+    capture = cvCaptureFromCAM( -1 );
+    if( capture )
+      {
+        while( true )
+        {
+          frame = cvQueryFrame( capture );
+
+      //-- 3. Apply the classifier to the frame
+          if( !frame.empty() )
+          { detectAndDisplay( frame ); }
+          else
+          { printf(" --(!) No captured frame -- Break!"); break; }
+
+          int c = cv::waitKey(10);
+          if( (char)c == 'c' ) { break; }
+         }
+      }
+
+
 }
+
+cv::String car_cascade_name = "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/haar/coches.xml";
+cv::CascadeClassifier car_cascade;
+string window_name = "Car Detection";
+cv::RNG rng(12345);
+
+    /** @function detectAndDisplay */
+    void detectAndDisplay( cv::Mat frame )
+    {
+      std::vector<Rect> faces;
+      cv::Mat frame_gray;
+
+      cvtColor( frame, frame_gray, CV_BGR2GRAY );
+      cv::equalizeHist( frame_gray, frame_gray );
+
+      //-- Detect faces
+      car_cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(30, 30) );
+
+      for( size_t i = 0; i < faces.size(); i++ )
+      {
+        Point center( faces[i].x + faces[i].width*0.5, faces[i].y + faces[i].height*0.5 );
+        ellipse( frame, center, Size( faces[i].width*0.5, faces[i].height*0.5), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+
+        Mat faceROI = frame_gray( faces[i] );
+
+
+
+      }
+      //-- Show what you got
+      imshow( window_name, frame );
+    }
+
+
