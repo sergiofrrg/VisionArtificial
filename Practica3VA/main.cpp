@@ -40,10 +40,10 @@ int main()
        //ss << "/home/sergiofrrg/Documentos/OPENCV/training/frontal_" << i << ".jpg";
        stringstream ss;
        //Dirección de labSergio
-       //ss << "/home/sferrer/Documentos/VisionArtificial/Practica3/training_frontal/frontal_" << i << ".jpg";
+       ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << i << ".jpg";
 
        //Dirección de labAza
-       ss << "/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << i << ".jpg";
+       //ss << "/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << i << ".jpg";
 
        ruta = ss.str();
        image=cv::imread(ruta,0);
@@ -73,9 +73,9 @@ int main()
 
    cv::Mat_<uchar> image3;
    //image3=cv::imread("/home/sergiofrrg/Escritorio/aerial.png");
-   //image3=cv::imread("/home/sferrer/Documentos/VisionArtificial/Practica3/Test/test1.jpg",0);
+   image3=cv::imread("/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/TestCars/Test/test1.jpg",0);
 
-   image3=cv::imread("/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/TestCars/Test/test1.jpg",0);
+   //image3=cv::imread("/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/TestCars/Test/test1.jpg",0);
 
    //HALLAMOS LOS KEYPOINTS Y DESCRIPTORES DE LA IMAGEN DE TEST
    orb.detect(image3, kp);
@@ -179,7 +179,8 @@ int main()
    if( !car_cascade.load( car_cascade_name ) ){ printf("--(!)Error loading\n"); return -1; };
 
 
-    //-- 2. Read the video stream
+   /*
+   //-- 2. Read the video stream
     capture = cvCaptureFromCAM( -1 );
     if( capture )
       {
@@ -197,7 +198,11 @@ int main()
           if( (char)c == 'c' ) { break; }
          }
       }
+    */
 
+   frame=imread("/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/TestCars/Test/test1.jpg");
+   detectAndDisplay(frame);
+   cv::waitKey();
 
 }
 
@@ -209,21 +214,23 @@ cv::RNG rng(12345);
     /** @function detectAndDisplay */
     void detectAndDisplay( cv::Mat frame )
     {
-      std::vector<Rect> faces;
+      std::vector<Rect> cars;
+      //imshow("a", frame);
+      //cv::waitKey();
       cv::Mat frame_gray;
 
-      cvtColor( frame, frame_gray, CV_BGR2GRAY );
+      cv::cvtColor( frame, frame_gray, CV_BGR2GRAY );
       cv::equalizeHist( frame_gray, frame_gray );
 
-      //-- Detect faces
-      car_cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(30, 30) );
+      //-- Detect cars
+      car_cascade.detectMultiScale( frame_gray, cars, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(30, 30) );
 
-      for( size_t i = 0; i < faces.size(); i++ )
+      for( size_t i = 0; i < cars.size(); i++ )
       {
-        Point center( faces[i].x + faces[i].width*0.5, faces[i].y + faces[i].height*0.5 );
-        ellipse( frame, center, Size( faces[i].width*0.5, faces[i].height*0.5), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+        Point center( cars[i].x + cars[i].width*0.5, cars[i].y + cars[i].height*0.5 );
+        ellipse( frame, center, Size( cars[i].width*0.5, cars[i].height*0.5), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
 
-        Mat faceROI = frame_gray( faces[i] );
+
 
 
 
