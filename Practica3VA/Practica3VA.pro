@@ -64,3 +64,11 @@ else:unix: LIBS += -L$$PWD/../../../../../usr/local/lib/ -lopencv_objdetect
 
 INCLUDEPATH += $$PWD/../../../../../usr/local/include
 DEPENDPATH += $$PWD/../../../../../usr/local/include
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../../usr/local/lib/release/ -lopencv_objdetect
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../../usr/local/lib/debug/ -lopencv_objdetect
+else:symbian: LIBS += -lopencv_objdetect
+else:unix: LIBS += -L$$PWD/../../../../../usr/local/lib/ -lopencv_objdetect
+
+INCLUDEPATH += $$PWD/../../../../../usr/local/include
+DEPENDPATH += $$PWD/../../../../../usr/local/include

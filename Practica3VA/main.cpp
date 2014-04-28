@@ -14,6 +14,7 @@
 #include <list>
 #include <string.h>
 #include <infokeypoint.h>
+#include <opencv2/objdetect/objdetect.hpp>
 
 using namespace std;
 using namespace cv;
@@ -47,10 +48,10 @@ int main()
        //ss << "/home/sergiofrrg/Documentos/OPENCV/training/frontal_" << i << ".jpg";
        stringstream ss;
        //Dirección de labSergio
-       //ss << "/home/sferrer/Documentos/VisionArtificial/Practica3/training_frontal/frontal_" << i << ".jpg";
+       ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << i << ".jpg";
 
        //Dirección de labAza
-       ss << "/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << i << ".jpg";
+       //ss << "/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << i << ".jpg";
 
        ruta = ss.str();
        image=cv::imread(ruta,0);
@@ -82,9 +83,9 @@ int main()
 
    cv::Mat_<uchar> image3;
    //image3=cv::imread("/home/sergiofrrg/Escritorio/aerial.png");
-   //image3=cv::imread("/home/sferrer/Documentos/VisionArtificial/Practica3/Test/test1.jpg",0);
+   image3=cv::imread("/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/TestCars/Test/test28.jpg",0);
 
-   image3=cv::imread("/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/TestCars/Test/test28.jpg",0);
+   //image3=cv::imread("/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/TestCars/Test/test28.jpg",0);
 
    //HALLAMOS LOS KEYPOINTS Y DESCRIPTORES DE LA IMAGEN DE TEST
    orb.detect(image3, kp);
@@ -252,7 +253,7 @@ int main()
       }
     */
 
-   frame=imread("/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/TestCars/Test/test1.jpg");
+   frame=imread("/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/TestCars/Test/test28.jpg");
    detectAndDisplay(frame);
    cv::waitKey();
 
