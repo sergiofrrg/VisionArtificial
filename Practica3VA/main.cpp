@@ -217,29 +217,30 @@ int main()
             2,
             8 );
    cv::rectangle(image3, esquinaIzq, esquinaDcha, cv::Scalar(255, 0, 255), 2, 8);
-   cv::imshow("imagen", image3);
-   cv::waitKey();
+   //cv::imshow("imagen", image3);
+   //cv::waitKey();
 
    //AQUI COMIENZA LO DEL HAAR
 
    void detectAndDisplay( cv::Mat frame );
 
 
-   CvCapture* capture;
+   //CvCapture* capture;
+   string direccion= "/home/sferrer/Documentos/Videos/videoAvi.avi";
+   cv::VideoCapture vCap (direccion);
    cv::Mat frame;
 
    //-- 1. Load the cascades
    if( !car_cascade.load( car_cascade_name ) ){ printf("--(!)Error loading\n"); return -1; };
 
 
-   /*
    //-- 2. Read the video stream
-    capture = cvCaptureFromCAM( -1 );
-    if( capture )
+   //capture = cvCaptureFromAVI("/home/sferrer/Documentos/Videos/video1.wmv");
+    if( vCap.isOpened() )
       {
         while( true )
         {
-          frame = cvQueryFrame( capture );
+          vCap.read(frame);
 
       //-- 3. Apply the classifier to the frame
           if( !frame.empty() )
@@ -250,12 +251,15 @@ int main()
           int c = cv::waitKey(10);
           if( (char)c == 'c' ) { break; }
          }
-      }
-    */
+    }else {
+        cout << "No se está leyendo el vídeo" << endl;
+        return -1;
+    }
 
-   frame=imread("/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/TestCars/Test/test28.jpg");
+
+   /*frame=imread("/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/TestCars/Test/test15.jpg");
    detectAndDisplay(frame);
-   cv::waitKey();
+   cv::waitKey();*/
 
 }
 
@@ -280,7 +284,8 @@ int main()
       for( size_t i = 0; i < cars.size(); i++ )
       {
         Point center( cars[i].x + cars[i].width*0.5, cars[i].y + cars[i].height*0.5 );
-        ellipse( frame, center, Size( cars[i].width*0.5, cars[i].height*0.5), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+        //ellipse( frame, center, Size( cars[i].width*0.5, cars[i].height*0.5), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+        rectangle(frame, cars[i], cv::Scalar (255, 255, 255), 2, 8 );
         cout << center << endl;
 
 
