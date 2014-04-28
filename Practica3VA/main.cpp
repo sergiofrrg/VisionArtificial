@@ -226,7 +226,7 @@ int main()
 
 
    //CvCapture* capture;
-   string direccion= "/home/sferrer/Documentos/Videos/videoAvi.avi";
+   string direccion= "/home/sferrer/Documentos/Videos/video2.wmv";
    cv::VideoCapture vCap (direccion);
    cv::Mat frame;
 
