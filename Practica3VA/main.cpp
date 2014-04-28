@@ -20,7 +20,7 @@ using namespace std;
 int main()
 {
    cv::Mat_<uchar> image;
-   cv::ORB orb (100,1.2f,8,31,0,2,cv::ORB::HARRIS_SCORE,31);
+   cv::ORB orb (10,1.2f,8,31,0,2,cv::ORB::HARRIS_SCORE,31);
    cv::Mat_<uchar> descriptoresImagen;
    cv::Mat_< cv::Mat_<uchar> > conjuntoDescriptores;
    vector<std::vector<cv::KeyPoint> > keyPoints;
@@ -29,6 +29,9 @@ int main()
    //vector<cv::Point> vectorPuntos;
    string ruta;
    cv::Point centro;
+   vector<double> escalas;
+
+   cv::Point tamanioImagenesAprendizaje;
 
    //cv::Mat conjuntoKeyPoints;
 
@@ -65,6 +68,8 @@ int main()
        conjuntoDescriptores.push_back(descriptoresImagen);
    }
 
+   tamanioImagenesAprendizaje.x = image.cols;
+   tamanioImagenesAprendizaje.y = image.rows;
 
    //CREAMOS EL ÍNDICE i PARA conjuntoDescriptores
    cv::flann::Index i (conjuntoDescriptores, cv::flann::LinearIndexParams(), cvflann::FLANN_DIST_HAMMING);
@@ -73,7 +78,7 @@ int main()
    //image3=cv::imread("/home/sergiofrrg/Escritorio/aerial.png");
    //image3=cv::imread("/home/sferrer/Documentos/VisionArtificial/Practica3/Test/test1.jpg",0);
 
-   image3=cv::imread("/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/TestCars/Test/test1.jpg",0);
+   image3=cv::imread("/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/TestCars/Test/test28.jpg",0);
 
    //HALLAMOS LOS KEYPOINTS Y DESCRIPTORES DE LA IMAGEN DE TEST
    orb.detect(image3, kp);
@@ -85,12 +90,13 @@ int main()
    cv::Mat dist;
    i.knnSearch(descriptoresImagen, indices, dist, k);
 
+   /*
    cout << "indices: " << endl << indices << endl;
    cout << "número de keypoints imagen test: " << endl << kp.size() << endl;
    cout << "descriptores Imagen Test: "<< endl << descriptoresImagen << endl;
    cout << "tamaño descriptores img test: " << descriptoresImagen.rows << "x" << descriptoresImagen.cols << endl;
    cout << "tamaño matriz descriptores aprendizaje: " << conjuntoDescriptores.rows << "x" << conjuntoDescriptores.cols << endl;
-   cout << "tamaño lista infoKeyPoints: " << listaInfoKeyPoints.size();
+   cout << "tamaño lista infoKeyPoints: " << listaInfoKeyPoints.size();*/
 
    //CREAMOS MATRIZ DE VOTACIÓN DEL TAMAÑO DE LA IMAGEN/bajaRes Y LO LLENAMOS DE 0s
    int bajaRes = 10;
@@ -101,7 +107,7 @@ int main()
        }
    }
 
-   int escalaImagenTest = kp.at(0).size;
+   double escalaImagenTest = kp.at(0).size;
 
    //OBTENEMOS LOS INFOKEYPOINTS DE APRENDIZAJE CORRESPONDIENTES A LOS DESCRIPTORES DE
    //APRENDIZAJE MÁS PARECIDOS A LOS DE LA IMAGEN TEST
@@ -122,15 +128,21 @@ int main()
 
        //Modificamos la escala de donde supuestamente está el centro comparando la de la
        //imagen test con la de la imagen de aprendizaje (de cualquiera de sus keypoints)
-       int escalaAprendizajeImagenK = kpAux.size;
-       dirCentroAux.x = dirCentroAux.x * (escalaImagenTest/escalaAprendizajeImagenK);
-       dirCentroAux.y = dirCentroAux.y * (escalaImagenTest/escalaAprendizajeImagenK);
+       double escalaAprendizajeImagenK = kpAux.size;
+       double reescalador = escalaImagenTest/escalaAprendizajeImagenK;
+       dirCentroAux.x = dirCentroAux.x * (reescalador);
+       dirCentroAux.y = dirCentroAux.y * (reescalador);
+
+       listaInfoKeyPoints.at(*it).setDifEscala(reescalador);
+       //escalas.push_back(reescalador);
 
        //Le sumamos el dirCentroAux al keyPoint actual de la imagen test para obtener el
        //supuesto centro
        cv::Point votoCentro;
        votoCentro.x = kp.at(contadorKP).pt.x + dirCentroAux.x;
        votoCentro.y = kp.at(contadorKP).pt.y + dirCentroAux.y;
+
+       listaInfoKeyPoints.at(*it).setVoto(votoCentro);
 
        cout << "iteración: " << contadorKP << " Indice: " << *it << " Voto al punto: " << votoCentro << endl;
 
@@ -148,16 +160,131 @@ int main()
    cv::Point centroFinal;
 
    cout << "matriz votación final: " << endl;
-   for (int i = 0; i<image3.cols/bajaRes; i++){
-       for (int j = 0; j<image3.rows/bajaRes; j++){
-           cout << matVotacion[i][j] << " ";
+   for (int j = 0; j<image3.rows/bajaRes; j++){
+       for (int i = 0; i<image3.cols/bajaRes; i++){
+           //cout << matVotacion[i][j] << " ";
            if (matVotacion[i][j]>valorMayor){
                valorMayor = matVotacion[i][j];
-               centroFinal.x = j*bajaRes;
-               centroFinal.y = i*bajaRes;
+               centroFinal.x = i*bajaRes;
+               centroFinal.y = j*bajaRes;
            }
        }
-       cout << endl;
+       //cout << endl;
    }
-   cout << centroFinal << endl;
+   cout << "Centro: " << centroFinal << endl;
+
+   //Hacemos la media de los reescaladores de los keypoints que han votado al centro
+   double media = 0;
+   int contador = 0;
+   for (int i = 0; i<listaInfoKeyPoints.size(); i++){
+       //media+=escalas.at(i);
+       InfoKeyPoint aux = listaInfoKeyPoints.at(i);
+       if ((aux.getVoto().x == (centroFinal.x/bajaRes)) &&
+               aux.getVoto().y == (centroFinal.y/bajaRes)){
+           media+=listaInfoKeyPoints.at(i).getDifEscala();
+           contador++;
+       }
+   }
+   media = media/contador;
+
+   //Reescalamos el rectangulo de las imagenes de aprendizaje
+   tamanioImagenesAprendizaje.x = tamanioImagenesAprendizaje.x * media;
+   tamanioImagenesAprendizaje.y = tamanioImagenesAprendizaje.y * media;
+
+   cout << "tamaño imagen test: " << image3.cols << ", " << image3.rows << endl;
+   cout << "tamaño rectangulo: " << tamanioImagenesAprendizaje << endl;
+
+   cv::Point esquinaIzq;
+   cv::Point esquinaDcha;
+
+   esquinaIzq.x = centroFinal.x-(tamanioImagenesAprendizaje.x/2);
+   esquinaIzq.y = centroFinal.y-(tamanioImagenesAprendizaje.y/2);
+
+   esquinaDcha.x = centroFinal.x+(tamanioImagenesAprendizaje.x/2);
+   esquinaDcha.y = centroFinal.y+(tamanioImagenesAprendizaje.y/2);
+
+   cv::circle( image3,
+            centroFinal,
+            3.0,
+            cv::Scalar( 255, 0, 255 ),
+            2,
+            8 );
+   cv::rectangle(image3, esquinaIzq, esquinaDcha, cv::Scalar(255, 0, 255), 2, 8);
+   cv::imshow("imagen", image3);
+   cv::waitKey();
+
+   //AQUI COMIENZA LO DEL HAAR
+
+      void detectAndDisplay( cv::Mat frame );
+
+      cv::String car_cascade_name = "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/haar/coches.xml";
+      cv::CascadeClassifier car_cascade;
+      string window_name = "Car Detection";
+      cv::RNG rng(12345);
+
+      CvCapture* capture;
+      cv::Mat frame;
+
+      //-- 1. Load the cascades
+      if( !car_cascade.load( car_cascade_name ) ){ printf("--(!)Error loading\n"); return -1; };
+
+
+      /*
+   //-- 2. Read the video stream
+   capture = cvCaptureFromCAM( -1 );
+   if( capture )
+   {
+   while( true )
+   {
+   frame = cvQueryFrame( capture );
+
+   //-- 3. Apply the classifier to the frame
+   if( !frame.empty() )
+   { detectAndDisplay( frame ); }
+   else
+   { printf(" --(!) No captured frame -- Break!"); break; }
+
+   int c = cv::waitKey(10);
+   if( (char)c == 'c' ) { break; }
+   }
+   }
+   */
+
+      frame=imread("/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/TestCars/Test/test1.jpg");
+      detectAndDisplay(frame);
+      cv::waitKey();
+
+   }
+
+   cv::String car_cascade_name = "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/haar/coches.xml";
+   cv::CascadeClassifier car_cascade;
+   string window_name = "Car Detection";
+   cv::RNG rng(12345);
+
+       /** @function detectAndDisplay */
+       void detectAndDisplay( cv::Mat frame )
+       {
+         std::vector<Rect> cars;
+         //imshow("a", frame);
+         //cv::waitKey();
+         cv::Mat frame_gray;
+
+         cv::cvtColor( frame, frame_gray, CV_BGR2GRAY );
+         cv::equalizeHist( frame_gray, frame_gray );
+
+         //-- Detect cars
+         car_cascade.detectMultiScale( frame_gray, cars, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(30, 30) );
+
+         for( size_t i = 0; i < cars.size(); i++ )
+         {
+           Point center( cars[i].x + cars[i].width*0.5, cars[i].y + cars[i].height*0.5 );
+           ellipse( frame, center, Size( cars[i].width*0.5, cars[i].height*0.5), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+
+
+
+
+
+         }
+         //-- Show what you got
+         imshow( window_name, frame );
 }

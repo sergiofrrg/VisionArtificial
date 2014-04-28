@@ -19,11 +19,17 @@ class InfoKeyPoint
 {
     cv::KeyPoint keyPoint;
     cv::Point vectorCentro;
+    cv::Point voto;
+    double difEscala;
 
 public:
     InfoKeyPoint(cv::KeyPoint k, cv::Point p);
     cv::KeyPoint getKeyPoint();
     cv::Point getVectorCentro();
+    void setVoto(cv::Point p);
+    void setDifEscala(double e);
+    double getDifEscala();
+    cv::Point getVoto();
 };
 
 #endif // INFOKEYPOINT_H
