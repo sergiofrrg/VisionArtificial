@@ -14,8 +14,10 @@
 #include <list>
 #include <string.h>
 #include <infokeypoint.h>
+#include <opencv2/objdetect/objdetect.hpp>
 
 using namespace std;
+using namespace cv;
 
 int main()
 {
@@ -41,10 +43,10 @@ int main()
        //ss << "/home/sergiofrrg/Documentos/OPENCV/training/frontal_" << i << ".jpg";
        stringstream ss;
        //Dirección de labSergio
-       //ss << "/home/sferrer/Documentos/VisionArtificial/Practica3/training_frontal/frontal_" << i << ".jpg";
+       ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << i << ".jpg";
 
        //Dirección de labAza
-       ss << "/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << i << ".jpg";
+       //ss << "/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << i << ".jpg";
 
        ruta = ss.str();
        image=cv::imread(ruta,0);
@@ -76,9 +78,13 @@ int main()
 
    cv::Mat_<uchar> image3;
    //image3=cv::imread("/home/sergiofrrg/Escritorio/aerial.png");
-   //image3=cv::imread("/home/sferrer/Documentos/VisionArtificial/Practica3/Test/test1.jpg",0);
+   image3=cv::imread("/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/TestCars/Test/test1.jpg",0);
 
+<<<<<<< HEAD
    image3=cv::imread("/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/TestCars/Test/test28.jpg",0);
+=======
+   //image3=cv::imread("/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/TestCars/Test/test1.jpg",0);
+>>>>>>> f5a8faad55e28cdf02fc597d5c7c2d6cd89b9413
 
    //HALLAMOS LOS KEYPOINTS Y DESCRIPTORES DE LA IMAGEN DE TEST
    orb.detect(image3, kp);
@@ -171,6 +177,7 @@ int main()
        }
        //cout << endl;
    }
+<<<<<<< HEAD
    cout << "Centro: " << centroFinal << endl;
 
    //Hacemos la media de los reescaladores de los keypoints que han votado al centro
@@ -255,12 +262,20 @@ int main()
       cv::waitKey();
 
    }
+=======
+   cout << centroFinal << endl;
+
+   //AQUI COMIENZA LO DEL HAAR
+
+   void detectAndDisplay( cv::Mat frame );
+>>>>>>> f5a8faad55e28cdf02fc597d5c7c2d6cd89b9413
 
    cv::String car_cascade_name = "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/haar/coches.xml";
    cv::CascadeClassifier car_cascade;
    string window_name = "Car Detection";
    cv::RNG rng(12345);
 
+<<<<<<< HEAD
        /** @function detectAndDisplay */
        void detectAndDisplay( cv::Mat frame )
        {
@@ -287,4 +302,73 @@ int main()
          }
          //-- Show what you got
          imshow( window_name, frame );
+=======
+   CvCapture* capture;
+   cv::Mat frame;
+
+   //-- 1. Load the cascades
+   if( !car_cascade.load( car_cascade_name ) ){ printf("--(!)Error loading\n"); return -1; };
+
+
+   /*
+   //-- 2. Read the video stream
+    capture = cvCaptureFromCAM( -1 );
+    if( capture )
+      {
+        while( true )
+        {
+          frame = cvQueryFrame( capture );
+
+      //-- 3. Apply the classifier to the frame
+          if( !frame.empty() )
+          { detectAndDisplay( frame ); }
+          else
+          { printf(" --(!) No captured frame -- Break!"); break; }
+
+          int c = cv::waitKey(10);
+          if( (char)c == 'c' ) { break; }
+         }
+      }
+    */
+
+   frame=imread("/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/TestCars/Test/test1.jpg");
+   detectAndDisplay(frame);
+   cv::waitKey();
+
+>>>>>>> f5a8faad55e28cdf02fc597d5c7c2d6cd89b9413
 }
+
+cv::String car_cascade_name = "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/haar/coches.xml";
+cv::CascadeClassifier car_cascade;
+string window_name = "Car Detection";
+cv::RNG rng(12345);
+
+    /** @function detectAndDisplay */
+    void detectAndDisplay( cv::Mat frame )
+    {
+      std::vector<Rect> cars;
+      //imshow("a", frame);
+      //cv::waitKey();
+      cv::Mat frame_gray;
+
+      cv::cvtColor( frame, frame_gray, CV_BGR2GRAY );
+      cv::equalizeHist( frame_gray, frame_gray );
+
+      //-- Detect cars
+      car_cascade.detectMultiScale( frame_gray, cars, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(30, 30) );
+
+      for( size_t i = 0; i < cars.size(); i++ )
+      {
+        Point center( cars[i].x + cars[i].width*0.5, cars[i].y + cars[i].height*0.5 );
+        ellipse( frame, center, Size( cars[i].width*0.5, cars[i].height*0.5), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+
+
+
+
+
+      }
+      //-- Show what you got
+      imshow( window_name, frame );
+    }
+
+
