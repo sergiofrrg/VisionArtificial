@@ -1,5 +1,3 @@
-//CAMBIAR EL KEYPOINTS Y EL DIRCENTRO NO ESTÁN BIEN.
-
 #include <iostream>
 #include <string>
 #include <stdlib.h>
@@ -13,7 +11,6 @@
 #include <vector>
 #include <list>
 #include <string.h>
-#include <infokeypoint.h>
 #include <opencv2/objdetect/objdetect.hpp>
 
 using namespace std;
@@ -26,7 +23,7 @@ int main()
        //ss << "/home/sergiofrrg/Documentos/OPENCV/training/frontal_" << i << ".jpg";
        stringstream ss;
        //Dirección de labSergio
-       ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << i << ".jpg";
+       ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << "1" << ".jpg";
 
        //Dirección de labAza
        //ss << "/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << i << ".jpg";
