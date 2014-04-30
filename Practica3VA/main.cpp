@@ -180,35 +180,6 @@ int main()
    }
    cout << "Centro: " << centroFinal << endl;
 
-   //Hacemos la media de los reescaladores de los keypoints que han votado al centro
-   double media = 0;
-   int contador = 0;
-   for (int i = 0; i<listaInfoKeyPoints.size(); i++){
-       //media+=escalas.at(i);
-       InfoKeyPoint aux = listaInfoKeyPoints.at(i);
-       if ((aux.getVoto().x == (centroFinal.x/bajaRes)) &&
-               aux.getVoto().y == (centroFinal.y/bajaRes)){
-           media+=listaInfoKeyPoints.at(i).getDifEscala();
-           contador++;
-       }
-   }
-   media = media/contador;
-
-   //Reescalamos el rectangulo de las imagenes de aprendizaje
-   tamanioImagenesAprendizaje.x = tamanioImagenesAprendizaje.x * media;
-   tamanioImagenesAprendizaje.y = tamanioImagenesAprendizaje.y * media;
-
-   cout << "tamaño imagen test: " << image3.cols << ", " << image3.rows << endl;
-   cout << "tamaño rectangulo: " << tamanioImagenesAprendizaje << endl;
-
-   cv::Point esquinaIzq;
-   cv::Point esquinaDcha;
-
-   esquinaIzq.x = centroFinal.x-(tamanioImagenesAprendizaje.x/2);
-   esquinaIzq.y = centroFinal.y-(tamanioImagenesAprendizaje.y/2);
-
-   esquinaDcha.x = centroFinal.x+(tamanioImagenesAprendizaje.x/2);
-   esquinaDcha.y = centroFinal.y+(tamanioImagenesAprendizaje.y/2);
 
    cv::circle( image3,
             centroFinal,
@@ -216,9 +187,9 @@ int main()
             cv::Scalar( 255, 0, 255 ),
             2,
             8 );
-   cv::rectangle(image3, esquinaIzq, esquinaDcha, cv::Scalar(255, 0, 255), 2, 8);
-   //cv::imshow("imagen", image3);
-   //cv::waitKey();
+
+   cv::imshow("imagen", image3);
+   cv::waitKey();
 
    //AQUI COMIENZA LO DEL HAAR
 
