@@ -97,11 +97,11 @@ int main()
             //Binarizamos los dígitos, no hace falta transformarlos a escala de gris porque ya están, da error si utilizas el cvtColor por eso.
 
             //Binary image
-            cv::Mat binaryDigit(digito.size(), digito.type());
+            //cv::Mat binaryDigit(digito.size(), digito.type());
 
             //Apply thresholding
-            cv::threshold(digito, binaryDigit, 128, 255, cv::THRESH_BINARY);
-
+            //cv::threshold(digito, binaryDigit, 128, 255, cv::THRESH_BINARY);
+            //cout << binaryDigit.row(0) << endl;
             //Show the results
             //cv::namedWindow("Binary Digit", cv::WINDOW_AUTOSIZE);
             //cv::imshow("Binary Digit", binaryDigit);               //Imagen del digito binarizada
@@ -109,12 +109,18 @@ int main()
             //cv::waitKey(0);
 
             //Se reescala la imagen del dígito a 10x10
-            cv::Mat_<int> resizedDigit(10, 10, DataType<int>::type);
+            cv::Mat resizedDigit(10, 10, DataType<int>::type);
 
             Size size(10,10);
 
-            cv::resize(binaryDigit,resizedDigit,size,0,0,INTER_LINEAR );
+            cv::resize(digito,resizedDigit,size,0,0,INTER_LINEAR );
 
+            cv::Mat binaryDigit(resizedDigit.size(), resizedDigit.type());
+
+            cv::threshold(resizedDigit, binaryDigit, 128, 255, cv::THRESH_BINARY);
+
+
+            //cout << binaryDigit.row(0) << endl;
             //cv::imshow("Resized Digit", resizedDigit);               //Imagen del digito reescalada
 
             //cv::waitKey(0);
@@ -127,12 +133,14 @@ int main()
 
             int i=0;
 
-            for (cv::Mat_<int>::iterator it = resizedDigit.begin(); it!=resizedDigit.end(); it++){
-                cout << (*it) << endl;
-                digitoFila[0][i]=(*it);
-                cout << digitoFila[0][i] << endl;
-                ++i;
-            }
+            cout << binaryDigit.at<Vec3b>(0,0) <<endl;
+
+//            for (cv::Mat_<int>::iterator it = binaryDigit.begin(); it!=binaryDigit.end(); it++){
+//                cout << (*it) << endl;
+//                digitoFila[0][i]=(*it);
+//                cout << digitoFila[0][i] << endl;
+//                ++i;
+//            }
 
 
 
