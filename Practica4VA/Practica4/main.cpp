@@ -27,7 +27,7 @@ int main()
    //ss << "/home/sergiofrrg/Documentos/OPENCV/training/frontal_" << i << ".jpg";
    stringstream ss;
    //Dirección de labSergio
-   ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << "1" << ".jpg";
+   ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << "15" << ".jpg";
    //Dirección de labAza
    //ss << "/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << 15 << ".jpg";
    ruta = ss.str();
@@ -48,8 +48,8 @@ int main()
        cv::threshold(grayscaleMat, binaryMat, 128, 255, cv::THRESH_BINARY);
 
        //Show the results
-       cv::namedWindow("Output", cv::WINDOW_AUTOSIZE);
-       cv::imshow("Output", binaryMat);
+       //cv::namedWindow("Output", cv::WINDOW_AUTOSIZE);
+       //cv::imshow("Binary Image", binaryMat);               //Imagen del coche binarizada
 
        //cv::waitKey(0);
 
@@ -72,9 +72,72 @@ int main()
 
         /// Show in a window
 
-        namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
-        imshow( "Contours", drawing );
+        //namedWindow( "Contours", CV_WINDOW_AUTOSIZE );      //Se dibujan los contornos encontrados
+        //imshow( "Contours", drawing );
 
-        cv::waitKey(0);
+        //cv::waitKey(0);
+
+        //Parte 2 de la práctica
+        cv::Mat_<uchar> digito;
+
+        //Cargamos los '1' como prueba
+
+        for(int i=1; i<=250; i++){
+
+            stringstream ss;
+            //Dirección de labSergio
+            ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP4/Digitos/1_" << i << ".jpg";
+
+            //Dirección de labAza
+            //ss << "/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << i << ".jpg";
+
+            ruta = ss.str();
+            digito=cv::imread(ruta,0);
+
+            //Binarizamos los dígitos, no hace falta transformarlos a escala de gris porque ya están, da error si utilizas el cvtColor por eso.
+
+            //Binary image
+            cv::Mat binaryDigit(digito.size(), digito.type());
+
+            //Apply thresholding
+            cv::threshold(digito, binaryDigit, 128, 255, cv::THRESH_BINARY);
+
+            //Show the results
+            //cv::namedWindow("Binary Digit", cv::WINDOW_AUTOSIZE);
+            //cv::imshow("Binary Digit", binaryDigit);               //Imagen del digito binarizada
+
+            //cv::waitKey(0);
+
+            //Se reescala la imagen del dígito a 10x10
+            cv::Mat_<int> resizedDigit(10, 10, DataType<int>::type);
+
+            Size size(10,10);
+
+            cv::resize(binaryDigit,resizedDigit,size,0,0,INTER_LINEAR );
+
+            //cv::imshow("Resized Digit", resizedDigit);               //Imagen del digito reescalada
+
+            //cv::waitKey(0);
+
+            //Centrar los Digitos ¿?
+
+            //Convertir las imágenes a matrices de 1x100
+
+            int digitoFila[1][100];
+
+            int i=0;
+
+            for (cv::Mat_<int>::iterator it = resizedDigit.begin(); it!=resizedDigit.end(); it++){
+                cout << (*it) << endl;
+                digitoFila[0][i]=(*it);
+                cout << digitoFila[0][i] << endl;
+                ++i;
+            }
+
+
+
+        }
+
+
 
 }
