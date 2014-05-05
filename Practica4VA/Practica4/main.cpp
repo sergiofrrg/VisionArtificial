@@ -79,10 +79,12 @@ int main()
 
         //Parte 2 de la práctica
         cv::Mat_<uchar> digito;
+        int vCaracteristicas[9250][100];
+        vector<char> e;
 
         //Cargamos los '1' como prueba
 
-        for(int i=1; i<=250; i++){
+        for(int i=1; i<=9250; i++){
 
             stringstream ss;
             //Dirección de labSergio
@@ -94,57 +96,59 @@ int main()
             ruta = ss.str();
             digito=cv::imread(ruta,0);
 
-            //Binarizamos los dígitos, no hace falta transformarlos a escala de gris porque ya están, da error si utilizas el cvtColor por eso.
-
-            //Binary image
-            //cv::Mat binaryDigit(digito.size(), digito.type());
-
-            //Apply thresholding
-            //cv::threshold(digito, binaryDigit, 128, 255, cv::THRESH_BINARY);
-            //cout << binaryDigit.row(0) << endl;
-            //Show the results
-            //cv::namedWindow("Binary Digit", cv::WINDOW_AUTOSIZE);
-            //cv::imshow("Binary Digit", binaryDigit);               //Imagen del digito binarizada
-
-            //cv::waitKey(0);
 
             //Se reescala la imagen del dígito a 10x10
-            cv::Mat resizedDigit(10, 10, DataType<int>::type);
+
+            //cv::Mat_<int> resizedDigit(10, 10, DataType<int>::type);
+
+            cv::Mat resizedDigit;
 
             Size size(10,10);
 
+            //cout << "Filas: " << resizedDigit.rows << " Columnas; " << resizedDigit.cols << endl << "FIN 1" << endl;
+
             cv::resize(digito,resizedDigit,size,0,0,INTER_LINEAR );
+
+
+
+            //Binarizamos los dígitos, no hace falta transformarlos a escala de gris porque ya están, da error si utilizas el cvtColor por eso.
 
             cv::Mat binaryDigit(resizedDigit.size(), resizedDigit.type());
 
             cv::threshold(resizedDigit, binaryDigit, 128, 255, cv::THRESH_BINARY);
 
 
-            //cout << binaryDigit.row(0) << endl;
-            //cv::imshow("Resized Digit", resizedDigit);               //Imagen del digito reescalada
-
-            //cv::waitKey(0);
-
             //Centrar los Digitos ¿?
 
             //Convertir las imágenes a matrices de 1x100
 
-            int digitoFila[1][100];
+            int j=0;
 
-            int i=0;
+            cv::MatIterator_<uchar> it;
+            for( it = binaryDigit.begin<uchar>(); it != binaryDigit.end<uchar>(); ++it){
 
-            cout << binaryDigit.at<Vec3b>(0,0) <<endl;
+                if((int)*it==255)
+                    vCaracteristicas[i-1][j]=1;
+                else
+                    vCaracteristicas[i-1][j]=0;
 
-//            for (cv::Mat_<int>::iterator it = binaryDigit.begin(); it!=binaryDigit.end(); it++){
-//                cout << (*it) << endl;
-//                digitoFila[0][i]=(*it);
-//                cout << digitoFila[0][i] << endl;
-//                ++i;
-//            }
+
+                ++j;
+
+            }
+
 
 
 
         }
+
+//        for (int i=0; i<250; i++){
+//            for(int j=0; j<100; j++){
+//                cout << vCaracteristicas[i][j] << " ";
+//            }
+//            cout << endl;
+//        }
+
 
 
 
