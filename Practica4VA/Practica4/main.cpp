@@ -27,9 +27,9 @@ int main()
    //ss << "/home/sergiofrrg/Documentos/OPENCV/training/frontal_" << i << ".jpg";
    stringstream ss;
    //Dirección de labSergio
-   //ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << "1" << ".jpg";
+   ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << "1" << ".jpg";
    //Dirección de labAza
-   ss << "/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << 15 << ".jpg";
+   //ss << "/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << 15 << ".jpg";
    ruta = ss.str();
 
        //Our color image
