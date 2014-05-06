@@ -62,7 +62,7 @@ int main()
         /// Detect edges using canny
         Canny(binaryMat, canny_output, 100, 255*2, 3 );
         /// Find contours
-        findContours( canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+        findContours( canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0) );
 
         /// Draw contours
         Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
@@ -78,6 +78,13 @@ int main()
         //imshow( "Contours", drawing );
 
         //cv::waitKey(0);
+
+        for (vector<vector<Point> >::iterator it = contours.begin(); it!=contours.end(); ++it)
+        {
+            cout << contourArea(*it)                                                                                                                                                                                << endl;
+        }
+
+        cout << contours.size() << endl;
 
         //Parte 2 de la práctica
         cv::Mat_<uchar> digito;
@@ -98,7 +105,7 @@ int main()
             if (aux == 0)
                 aux = 250;
 
-                        cout << aux << " " << nClase << endl;
+                        //cout << aux << " " << nClase << endl;
 
             ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP4/Digitos/" << clases[nClase] << "_" << aux << ".jpg";
 
@@ -181,7 +188,6 @@ int main()
 //        for (int i = 0; i<e.size(); i++){
 //            cout << e.at(i) << endl;
 //        }
-
 
 
 }
