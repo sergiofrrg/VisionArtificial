@@ -25,14 +25,16 @@ RNG rng(12345);
 cv::String car_cascade_name = "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/haar/coches.xml";
 cv::CascadeClassifier car_cascade;
 string window_name = "Car Detection";
-const float minimoArea=80.0/24893.0;
+const float minimoArea=105.0/24893.0;
 const float maximoArea=300.0/24893.0;
+//const int tamanioResize=20;
 
 
 /** @function detectAndDisplay */
 Rect detectAndDisplay( cv::Mat frame)
 {
   std::vector<Rect> cars;
+
   //imshow("a", frame);
   //cv::waitKey();
   cv::Mat frame_gray;
@@ -42,15 +44,23 @@ Rect detectAndDisplay( cv::Mat frame)
 
   //-- Detect cars
   car_cascade.detectMultiScale( frame_gray, cars, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(30, 30) );
+  Rect coche=cars[0];
 
   cout << "Número de coches detectados: " << cars.size() << endl;
 
+  if (cars.size()>1){
+      for (int i=1; i<cars.size(); ++i){
+          if (cars[i].area()>coche.area())
+              coche=cars[i];
+      }
+  }
+
   int i=0;
-    Point center( cars[i].x + cars[i].width*0.5, cars[i].y + cars[i].height*0.5 );
+    Point center( coche.x + coche.width*0.5, coche.y + coche.height*0.5 );
     //ellipse( frame, center, Size( cars[i].width*0.5, cars[i].height*0.5), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
     //rectangle(frame, cars[i], cv::Scalar (255, 255, 255), 2, 8 );
     cout << center << endl;
-    return cars[i];
+    return coche;
 }
 
 //FILTRO 1
@@ -104,23 +114,41 @@ vector<vector<Point> > filtroPosicion(vector<vector<Point> > contornos, cv::Mat 
     return newContours;
 }
 
+//FILTRO 5
+vector<vector<Point> > filtroOrdenacion(vector<vector<Point> > contours){
+    vector<vector<Point> > newContours;
+    std::vector<int> equises;
+    for(int i=0; i<contours.size(); ++i){
+        equises.push_back(cv::boundingRect(contours.at(i)).x);
+    }
+    std::sort(equises.begin(), equises.end());
+    for(int i=0; i<equises.size(); ++i){
+        for (int j=0; j<contours.size(); j++){
+            if (cv::boundingRect(contours.at(j)).x == equises.at(i))
+                newContours.push_back(contours.at(j));
+        }
+    }
+    return newContours;
+}
 
 int main()
 {
+   string matricula;
    string ruta;
+   string ruta1;
    cv::Rect rectangulo;
    //ss << "/home/sergiofrrg/Documentos/OPENCV/training/frontal_" << i << ".jpg";
    stringstream ss;
    //Dirección de labSergio
    //ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << "1" << ".jpg";
-   ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/TestCars/Test/test" << "15" << ".jpg";
+   ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/TestCars/Test/test" << "26" << ".jpg";
    //Dirección de labAza
-   //ss << "/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << 15 << ".jpg";
-   ruta = ss.str();
+   //ss << "/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << 17 << ".jpg";
+   ruta1 = ss.str();
 
    //AQUI COMIENZA LO DEL HAAR
 
-   cv::Mat frame=cv::imread(ruta, CV_LOAD_IMAGE_COLOR);;
+   cv::Mat frame=cv::imread(ruta1, CV_LOAD_IMAGE_COLOR);
 
    //-- 1. Load the cascades
    if( !car_cascade.load( car_cascade_name ) ){ printf("--(!)Error loading\n"); return -1; };
@@ -149,8 +177,8 @@ int main()
    cout << "Frame: " << frame.cols*frame.rows << endl;
 
 
-   imshow( window_name, frame );
-   waitKey(0);
+   //imshow( window_name, frame );
+   //waitKey(0);
 
     cv::Mat imageMat=frame;
 
@@ -171,27 +199,23 @@ int main()
        cv::Mat binaryMat(grayscaleMat.size(), grayscaleMat.type());
 
        //Apply thresholding
-       //cv::adaptiveThreshold(grayscaleMat, binaryMat, 128, 255, cv::THRESH_BINARY);
-       cv::adaptiveThreshold(grayscaleMat, binaryMat, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 7, 10);
+       //cv::threshold(grayscaleMat, binaryMat, 128, 255, cv::THRESH_BINARY);
+       cv::adaptiveThreshold(grayscaleMat, binaryMat, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 9, 10);
        //Show the results
        //cv::namedWindow("Output", cv::WINDOW_AUTOSIZE);
 
        //cv::imshow("Binary Image", binaryMat);               //Imagen del coche binarizada
 
        //cv::waitKey(0);
+        cv::Mat imagenUmbralizadaCopia=binaryMat.clone();
 
-       cv::Mat canny_output;
         vector<vector<Point> > contours;
         vector<cv::Vec4i> hierarchy;
 
-        /// Detect edges using canny
-        Canny(binaryMat, canny_output, 100, 300, 3 );
 
-        //cv::imshow("Canny", canny_output);
-        //cv::waitKey(0);
 
         /// Find contours
-        findContours( canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0) );
+        findContours( binaryMat, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0) );
         vector<vector<Point> > newContours;
 
         //cout << (rectangulo.area()/2)*minimoArea << endl;
@@ -201,12 +225,13 @@ int main()
         newContours = filtroProporcion(newContours);
         newContours = filtroSeparacion(newContours, frame);
         newContours = filtroPosicion(newContours, frame);
+        newContours = filtroOrdenacion(newContours);
 
         cout << newContours.size() << endl;
 
 
         /// Draw contours
-        Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
+        Mat drawing = Mat::zeros( binaryMat.size(), CV_8UC3 );
         for( int i = 0; i< newContours.size(); i++ )
            {
              Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
@@ -216,10 +241,10 @@ int main()
 
         /// Show in a window
 
-        namedWindow( "Contours", CV_WINDOW_AUTOSIZE );      //Se dibujan los contornos encontrados
-        imshow( "Contours", drawing );
+        //namedWindow( "Contours", CV_WINDOW_AUTOSIZE );      //Se dibujan los contornos encontrados
+        //imshow( "Contours", drawing );
 
-        cv::waitKey(0);
+        //cv::waitKey(0);
 
         //PARTE 2 //////////////////////////////////////////////////////////////////////////////////
         cv::Mat_<uchar> digito;
@@ -304,24 +329,84 @@ int main()
         cout << cr.rows << " " << cr.cols << endl;
         cout << cr.row(0);
 
+        //Creamos el índice de flann
 
-//        cout << mCaracteristicas.row(0) << endl;
-//        for(int j=0; j<100; j++){
-//                        cout << vCaracteristicas[0][j] << ", ";
-//                    }
-//                    cout << endl;
+        cv::flann::Index i (cr, cv::flann::KDTreeIndexParams(), cvflann::FLANN_DIST_EUCLIDEAN);
 
 
-//        for (int i=0; i<250; i++){
-//            for(int j=0; j<100; j++){
-//                cout << vCaracteristicas[i][j] << " ";
-//            }
-//            cout << endl;
-//        }
 
-//        for (int i = 0; i<e.size(); i++){
-//            cout << e.at(i) << endl;
-//        }
+        for (int j=0; j < newContours.size(); ++j){
 
+            cv::Mat imageAux=imagenUmbralizadaCopia;
+            Rect rectAux=cv::boundingRect(newContours.at(j));
+            imageAux=imageAux.rowRange(rectAux.y,rectAux.y+rectAux.height);
+            imageAux=imageAux.colRange(rectAux.x, rectAux.x+rectAux.width);
+
+            cv::Mat resizedDigit;
+
+            Size size(10,10);
+
+            cv::resize(imageAux,resizedDigit,size,0,0,cv::INTER_LINEAR );
+
+            cv::Mat_<float> floatMat=resizedDigit/255.0;
+
+
+            cv::Mat_<float> fila;
+
+            cv::MatIterator_<float> it;
+            for( it = floatMat.begin(); it != floatMat.end(); ++it){
+
+                fila.push_back(*it);
+
+
+            }
+
+            cv::Mat_<float> matReduced = lda.project(fila.t());
+            //cout << matReduced.rows << " " << matReduced.cols << endl;
+
+            int vectorVotacion[37];
+            for(int k=0; k<37; ++k){
+                vectorVotacion[k]=0;
+            }
+
+            int k = 40;
+            cv::Mat_<int> indices;
+            cv::Mat dist;
+            i.knnSearch(matReduced, indices, dist, k);
+
+            for(cv::Mat_<int>::iterator it = indices.begin(); it!=indices.end(); it++){
+
+                vectorVotacion[eNteros[(*it)]]++;
+            }
+
+            int valorMayor=0;
+            int voto;
+            for(int cont=0; cont<37; ++cont){
+                if(vectorVotacion[cont]>valorMayor){
+                    valorMayor=vectorVotacion[cont];
+                    voto=cont;
+                }
+
+            }
+
+            //cout << clases[voto] << endl;
+            matricula+=clases[voto];
+
+        }
+
+        cv::Point pt1;
+
+        //cv::InitFont( &font, CV_FONT_VECTOR0, 0.5, 0.5, 0, 2.0, CV_AA);	//Inicializamos el código fuente
+
+        pt1.x = 100;
+
+        pt1.y = 100;
+
+        cv::Mat foticuen=cv::imread(ruta1, CV_LOAD_IMAGE_COLOR);
+
+        cv::putText(foticuen, matricula, pt1, 2, 3, 255);
+
+        cv::imshow("Ejemplo5", foticuen );
+        cv::waitKey(0);
 
 }
