@@ -144,8 +144,13 @@ vector<vector<Point> > filtroOrdenacion(vector<vector<Point> > contours) {
 
 cv::Mat_<float> resizer(cv::Mat binaryDigit){
 
+    Size size;
     cv::Mat resizedDigit;
-    Size size((binaryDigit.cols * 10) / binaryDigit.rows, 10);
+    if (((binaryDigit.cols*10) / binaryDigit.rows) < 1)
+        size = Size (1, 10);
+    else
+        size = Size ((binaryDigit.cols * 10) / binaryDigit.rows, 10);
+
     Size size2(10, 10);
 
     cv::resize(binaryDigit, resizedDigit, size, 0, 0, cv::INTER_LINEAR);
@@ -175,6 +180,100 @@ cv::Mat_<float> matrizAFila(cv::Mat_<float> floatMat){
     return fila.t();
 }
 
+cv::Mat borrarBordes (cv::Mat digito){
+    int arriba=0;
+    int abajo=0;
+    int izq=0;
+    int der=0;
+    int col=0;
+    int row=0;
+    bool negro=false;
+    //cout << "Primer While" << endl;
+    while(!negro&&row<digito.rows){
+        uchar* p=digito.ptr(row);
+        while(!negro&&col<digito.cols){
+            if((int)*p==0){
+                negro=true;
+            }
+            p++;
+            ++col;
+        }
+        ++row;
+        col=0;
+
+    }
+    if(negro){
+        arriba=row-1;
+    }
+
+    row=digito.rows-1;
+    col=0;
+    negro=false;
+    while(!negro&&row>=0){
+        uchar* p=digito.ptr(row);
+        while(!negro&&col<digito.cols){
+            if((int)*p==0){
+                negro=true;
+            }
+            p++;
+            ++col;
+        }
+        --row;
+        col=0;
+    }
+    if(negro){
+        abajo=row+1;
+    }
+
+    row = 0;
+    col = 0;
+    negro=false;
+    uchar* p=digito.ptr(row);
+    while(!negro&&col<digito.cols){
+        while(!negro&&row<digito.rows){
+            p=digito.ptr(row);
+            p+=col;
+            if((int)*p==0){
+                negro=true;
+            }
+            ++row;
+        }
+        //p++;
+        ++col;
+        row = 0;
+    }
+    if(negro){
+        izq=col-1;
+    }
+
+    row = 0;
+    col = digito.cols-1;
+    negro=false;
+    p=digito.ptr(row);
+    while(!negro&&col>=0){
+        while(!negro&&row<digito.rows){
+            p=digito.ptr(row);
+            p+=col;
+            if((int)*p==0)
+            {
+                negro=true;
+            }
+            ++row;
+        }
+        //p--;
+        --col;
+        row = 0;
+    }
+    if(negro){
+        der=col+1;
+    }
+
+    digito = digito.rowRange(arriba, abajo);
+    digito = digito.colRange(izq, der);
+    return digito;
+
+}
+
 int main() {
     string matricula;
     string ruta;
@@ -184,17 +283,90 @@ int main() {
     stringstream ss;
     //Dirección de labSergio
     //ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << "1" << ".jpg";
-    ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/TestCars/Test/test" << "28" << ".jpg";
+    ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/TestCars/Test/test" << "25" << ".jpg";
     //Dirección de labAza
     //ss << "/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << 17 << ".jpg";
     ruta1 = ss.str();
 
+    //////////////////////////////////////
+    // APRENDIZAJE //////////////////////
+    /////////////////////////////////////
 
+    //PARTE 2 //////////////////////////////////////////////////////////////////////////////////
+    cv::Mat_<uchar> digito;
+    string clases [37] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "ESP", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+    vector<string> e;
+    vector<int> eNteros;
+    cv::Mat_<float> mCaracteristicas;
+    //Cargamos los '1' como prueba
+
+    int nClase = 0;
+
+    for (int i = 1; i <= 9250; i++) {
+
+        stringstream ss;
+
+        int aux = i % 250;
+        if (aux == 0)
+            aux = 250;
+
+        ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP4/Digitos/" << clases[nClase] << "_" << aux << ".jpg";
+
+        ruta = ss.str();
+        digito = cv::imread(ruta, 0);
+
+        //Binary image
+        cv::Mat binaryDigit(digito.size(), digito.type());
+
+        //Apply thresholding
+
+        //cv::adaptiveThreshold(digito, binaryDigit, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 15, 10);
+        cv::threshold(digito, binaryDigit, 200, 255, cv::THRESH_BINARY);
+
+       // cout << "Borro bordes del digito " << i << " de alto " << binaryDigit.rows << " y ancho " << binaryDigit.cols << endl;
+        //binaryDigit=borrarBordes(binaryDigit.clone());
+        //cout << "Borrado OK. Tamaño: " << binaryDigit.cols << "x" << binaryDigit.rows << endl;
+
+        //imshow("",binaryDigit);
+        //waitKey(0);
+
+        //Se reescala la imagen del dígito a 10x10
+        cv::Mat_<float> floatMat = resizer(binaryDigit);
+        //cout << "despues del resizer" << endl;
+
+//                        imshow("",floatMat);
+//                        waitKey(0);
+
+        //Convertir las imágenes a matrices de 1x100 con el matrizAFila e introducirlas en mCaracteristicas para crear el LDA
+
+        e.push_back(clases[nClase]);
+        eNteros.push_back(nClase);
+        mCaracteristicas.push_back((cv::Mat_<float>)matrizAFila(floatMat));
+
+        if (i % 250 == 0)
+            nClase++;
+
+    }
+
+    //Creamos el LDA
+
+    LDA lda(mCaracteristicas, eNteros);
+    cv::Mat_<float> cr;
+    cr = lda.project(mCaracteristicas);
+
+    //Creamos el índice de flann
+
+    cv::flann::Index i(cr, cv::flann::KDTreeIndexParams(), cvflann::FLANN_DIST_EUCLIDEAN);
+
+
+    ///////////////////////////////////////////////////////
+    // TESTING
+    ///////////////////////////////////////////////////////
 
     //AQUI COMIENZA LO DEL HAAR
 
     //string direccion = "/home/sferrer/Documentos/Videos/video2.wmv";
-    string direccion = "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/TestCars/Test/test14.jpg";
+    string direccion = "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/TestCars/Test/test15.jpg";
     cv::VideoCapture vCap(direccion);
     cv::Mat frame;
     //cv::Mat frame=cv::imread(ruta1, CV_LOAD_IMAGE_COLOR);
@@ -263,12 +435,11 @@ int main() {
 
 
                     /// Draw contours
-                    Mat drawing = Mat::zeros(binaryMat.size(), CV_8UC3);
-                    for (int i = 0; i < newContours.size(); i++) {
-                        Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
-                        drawContours(drawing, newContours, i, color, 2, 8, hierarchy, 0, Point());
-                    }
-
+//                    Mat drawing = Mat::zeros(binaryMat.size(), CV_8UC3);
+//                    for (int i = 0; i < newContours.size(); i++) {
+//                        Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+//                        drawContours(drawing, newContours, i, color, 2, 8, hierarchy, 0, Point());
+//                    }
 
                     /// Show in a window
 
@@ -277,65 +448,7 @@ int main() {
 
                     //cv::waitKey(0);
 
-                    //PARTE 2 //////////////////////////////////////////////////////////////////////////////////
-                    cv::Mat_<uchar> digito;
-                    string clases [37] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "ESP", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
-                    vector<string> e;
-                    vector<int> eNteros;
-                    cv::Mat_<float> mCaracteristicas;
-                    //Cargamos los '1' como prueba
 
-                    int nClase = 0;
-
-                    for (int i = 1; i <= 9250; i++) {
-
-                        stringstream ss;
-                        //Dirección de labSergio
-
-                        int aux = i % 250;
-                        if (aux == 0)
-                            aux = 250;
-
-                        ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP4/Digitos/" << clases[nClase] << "_" << aux << ".jpg";
-
-                        //Dirección de labAza
-                        //ss << "/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << i << ".jpg";
-
-                        ruta = ss.str();
-                        digito = cv::imread(ruta, 0);
-
-                        //Binary image
-                        cv::Mat binaryDigit(digito.size(), digito.type());
-
-                        //Apply thresholding
-
-                        cv::adaptiveThreshold(digito, binaryDigit, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 11, 10);
-
-
-                        //Se reescala la imagen del dígito a 10x10
-
-                        cv::Mat_<float> floatMat = resizer(binaryDigit);
-
-                        //Convertir las imágenes a matrices de 1x100 con el matrizAFila e introducirlas en mCaracteristicas para crear el LDA
-
-                        e.push_back(clases[nClase]);
-                        eNteros.push_back(nClase);
-                        mCaracteristicas.push_back((cv::Mat_<float>)matrizAFila(floatMat));
-
-                        if (i % 250 == 0)
-                            nClase++;
-
-                    }
-
-                    //Creamos el LDA
-
-                    LDA lda(mCaracteristicas, eNteros);
-                    cv::Mat_<float> cr;
-                    cr = lda.project(mCaracteristicas);
-
-                    //Creamos el índice de flann
-
-                    cv::flann::Index i(cr, cv::flann::KDTreeIndexParams(), cvflann::FLANN_DIST_EUCLIDEAN);
 
                     for (int j = 0; j < newContours.size(); ++j) {
 
