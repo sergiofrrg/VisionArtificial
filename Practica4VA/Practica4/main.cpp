@@ -140,6 +140,41 @@ vector<vector<Point> > filtroOrdenacion(vector<vector<Point> > contours) {
     return newContours;
 }
 
+//METODO RESIZER: Convierte los dígitos a 10x10 manteniendo el ratio de aspecto
+
+cv::Mat_<float> resizer(cv::Mat binaryDigit){
+
+    cv::Mat resizedDigit;
+    Size size((binaryDigit.cols * 10) / binaryDigit.rows, 10);
+    Size size2(10, 10);
+
+    cv::resize(binaryDigit, resizedDigit, size, 0, 0, cv::INTER_LINEAR);
+
+    Point puntoOrigen((10 - resizedDigit.cols) / 2, 0);
+
+    Rect roi(puntoOrigen, Size(resizedDigit.cols, resizedDigit.rows));
+
+
+    cv::Mat matriz = cv::Mat::ones(size2, resizedDigit.type())*255;
+
+    resizedDigit.copyTo(matriz(roi));
+    resizedDigit = matriz;
+
+    return resizedDigit/255.0;
+
+}
+
+cv::Mat_<float> matrizAFila(cv::Mat_<float> floatMat){
+    cv::Mat_<float> fila;
+
+    cv::MatIterator_<float> it;
+    for (it = floatMat.begin(); it != floatMat.end(); ++it) {
+
+        fila.push_back(*it);
+    }
+    return fila.t();
+}
+
 int main() {
     string matricula;
     string ruta;
@@ -279,52 +314,20 @@ int main() {
 
                         //Se reescala la imagen del dígito a 10x10
 
-                        cv::Mat resizedDigit;
+                        cv::Mat_<float> floatMat = resizer(binaryDigit);
 
-                        Size size((binaryDigit.cols * 10) / binaryDigit.rows, 10);
-
-                        Size size2(10, 10);
-
-                        cv::resize(binaryDigit, resizedDigit, size, 0, 0, cv::INTER_LINEAR);
-
-                        Point puntoOrigen((10 - resizedDigit.cols) / 2, 0);
-
-                        Rect roi(puntoOrigen, Size(resizedDigit.cols, resizedDigit.rows));
-
-
-                        cv::Mat matriz = cv::Mat::ones(size2, resizedDigit.type())*255;
-
-                        resizedDigit.copyTo(matriz(roi));
-
-                        resizedDigit = matriz;
-
-
-                        cv::Mat_<float> floatMat = resizedDigit / 255.0;
-
-
-                        //Convertir las imágenes a matrices de 1x100
-
-
-                        cv::Mat_<float> fila;
-
-                        cv::MatIterator_<float> it;
-                        for (it = floatMat.begin(); it != floatMat.end(); ++it) {
-
-                            fila.push_back(*it);
-
-
-                        }
-
-
+                        //Convertir las imágenes a matrices de 1x100 con el matrizAFila e introducirlas en mCaracteristicas para crear el LDA
 
                         e.push_back(clases[nClase]);
                         eNteros.push_back(nClase);
-                        mCaracteristicas.push_back((cv::Mat_<float>)fila.t());
+                        mCaracteristicas.push_back((cv::Mat_<float>)matrizAFila(floatMat));
 
                         if (i % 250 == 0)
                             nClase++;
 
                     }
+
+                    //Creamos el LDA
 
                     LDA lda(mCaracteristicas, eNteros);
                     cv::Mat_<float> cr;
@@ -341,40 +344,9 @@ int main() {
                         imageAux = imageAux.rowRange(rectAux.y, rectAux.y + rectAux.height);
                         imageAux = imageAux.colRange(rectAux.x, rectAux.x + rectAux.width);
 
-                        cv::Mat resizedDigit;
+                        cv::Mat_<float> floatMat = resizer(imageAux);
 
-                        Size size((imageAux.cols * 10) / imageAux.rows, 10);
-
-                        Size size2(10, 10);
-
-                        cv::resize(imageAux, resizedDigit, size, 0, 0, cv::INTER_LINEAR);
-
-                        Point puntoOrigen((10 - resizedDigit.cols) / 2, 0);
-
-                        Rect roi(puntoOrigen, Size(resizedDigit.cols, resizedDigit.rows));
-
-
-                        cv::Mat matriz = cv::Mat::ones(size2, resizedDigit.type())*255;
-
-                        resizedDigit.copyTo(matriz(roi));
-
-                        resizedDigit = matriz;
-
-
-                        cv::Mat_<float> floatMat = resizedDigit / 255.0;
-
-
-                        cv::Mat_<float> fila;
-
-                        cv::MatIterator_<float> it;
-                        for (it = floatMat.begin(); it != floatMat.end(); ++it) {
-
-                            fila.push_back(*it);
-
-
-                        }
-
-                        cv::Mat_<float> matReduced = lda.project(fila.t());
+                        cv::Mat_<float> matReduced = lda.project(matrizAFila(floatMat));
 
                         int vectorVotacion[37];
                         for (int k = 0; k < 37; ++k) {
