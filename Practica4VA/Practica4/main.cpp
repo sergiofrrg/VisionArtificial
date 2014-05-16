@@ -13,6 +13,7 @@
 #include <string.h>
 #include <opencv2/objdetect/objdetect.hpp>
 #include <subspace.hpp>
+#include <filtro.h>
 
 using namespace std;
 using namespace cv;
@@ -22,14 +23,12 @@ int thresh = 100;
 int max_thresh = 255;
 RNG rng(12345);
 
-cv::String car_cascade_name = "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/haar/coches.xml";
+cv::String car_cascade_name = "haar/coches.xml";
 cv::CascadeClassifier car_cascade;
-string window_name = "Car Detection";
 const float minimoArea = 105.0 / 24893.0;
 const float maximoArea = 300.0 / 24893.0;
-//const int tamanioResize=20;
+const int tamanioResize=10;
 
-/** @function detectAndDisplay */
 Rect detectAndDisplay(cv::Mat frame) {
     std::vector<Rect> cars;
 
@@ -57,105 +56,100 @@ Rect detectAndDisplay(cv::Mat frame) {
                 coche = cars[i];
         }
     }
-
-    int i = 0;
-    Point center(coche.x + coche.width * 0.5, coche.y + coche.height * 0.5);
-    //ellipse( frame, center, Size( cars[i].width*0.5, cars[i].height*0.5), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
     rectangle(frame, coche, cv::Scalar(255, 255, 255), 2, 8);
-    //cout << center << endl;
     imshow("", frame);
     return coche;
 }
 
-//FILTRO 1
+////FILTRO 1
 
-vector<vector<Point> > filtroArea(vector<vector<Point> > contours, cv::Mat frame) {
-    // 1er filtro: descartamos caracteres por su area
-    vector<vector<Point> > newContours;
-    for (int i = 0; i < contours.size(); ++i) {
-        if ((cv::boundingRect(contours.at(i)).area() >= frame.cols * frame.rows * minimoArea)&&(cv::boundingRect(contours.at(i)).area() <= frame.cols * frame.rows * maximoArea))
-            newContours.push_back(contours.at(i));
-        //cout << cv::boundingRect(contours.at(i)).area()<< endl;
-    }
-    return newContours;
-}
+//vector<vector<Point> > filtroArea(vector<vector<Point> > contours, cv::Mat frame) {
+//    // 1er filtro: descartamos caracteres por su area
+//    vector<vector<Point> > newContours;
+//    for (int i = 0; i < contours.size(); ++i) {
+//        if ((cv::boundingRect(contours.at(i)).area() >= frame.cols * frame.rows * minimoArea)&&(cv::boundingRect(contours.at(i)).area() <= frame.cols * frame.rows * maximoArea))
+//            newContours.push_back(contours.at(i));
+//        //cout << cv::boundingRect(contours.at(i)).area()<< endl;
+//    }
+//    return newContours;
+//}
 
-//FILTRO 2
+////FILTRO 2
 
-vector<vector<Point> > filtroProporcion(vector<vector<Point> > contours) {
-    vector<vector<Point> > newContours;
-    for (int i = 0; i < contours.size(); ++i) {
-        if ((cv::boundingRect(contours.at(i)).height) > (cv::boundingRect(contours.at(i)).width))
-            newContours.push_back(contours.at(i));
-        //cout << cv::boundingRect(contours.at(i)).area()<< endl;
-    }
-    return newContours;
-}
+//vector<vector<Point> > filtroProporcion(vector<vector<Point> > contours) {
+//    vector<vector<Point> > newContours;
+//    for (int i = 0; i < contours.size(); ++i) {
+//        if ((cv::boundingRect(contours.at(i)).height) > (cv::boundingRect(contours.at(i)).width))
+//            newContours.push_back(contours.at(i));
+//        //cout << cv::boundingRect(contours.at(i)).area()<< endl;
+//    }
+//    return newContours;
+//}
 
-//FILTRO 3
+////FILTRO 3
 
-vector<vector<Point> > filtroSeparacion(vector<vector<Point> > contornos, cv::Mat frame) {
-    vector<vector<Point> > newContours;
-    for (int i = 0; i < contornos.size(); i++) {
-        cv::Rect rectAux = cv::boundingRect(contornos.at(i));
-        for (int j = 0; j < contornos.size(); j++) {
-            cv::Rect rectAuxCompara = cv::boundingRect(contornos.at(j));
-            if ((std::abs(rectAux.x - rectAuxCompara.x) < (frame.cols / 10)) && (j != i)) {
-                newContours.push_back(contornos.at(i));
-                break;
-            }
-        }
-    }
-    return newContours;
-}
+//vector<vector<Point> > filtroSeparacion(vector<vector<Point> > contornos, cv::Mat frame) {
+//    vector<vector<Point> > newContours;
+//    for (int i = 0; i < contornos.size(); i++) {
+//        cv::Rect rectAux = cv::boundingRect(contornos.at(i));
+//        for (int j = 0; j < contornos.size(); j++) {
+//            cv::Rect rectAuxCompara = cv::boundingRect(contornos.at(j));
+//            if ((std::abs(rectAux.x - rectAuxCompara.x) < (frame.cols / 10)) && (j != i)) {
+//                newContours.push_back(contornos.at(i));
+//                break;
+//            }
+//        }
+//    }
+//    return newContours;
+//}
 
-//FILTRO 4
+////FILTRO 4
 
-vector<vector<Point> > filtroPosicion(vector<vector<Point> > contornos, cv::Mat frame) {
-    vector<vector<Point> > newContours;
-    for (int i = 0; i < contornos.size(); i++) {
-        cv::Rect rectAux = cv::boundingRect(contornos.at(i));
-        float centro = frame.cols / 2;
-        if ((rectAux.x >= centro - (frame.cols / 4)) && (rectAux.x <= centro + (frame.cols / 4)))
-            newContours.push_back(contornos.at(i));
-    }
-    return newContours;
-}
+//vector<vector<Point> > filtroPosicion(vector<vector<Point> > contornos, cv::Mat frame) {
+//    vector<vector<Point> > newContours;
+//    for (int i = 0; i < contornos.size(); i++) {
+//        cv::Rect rectAux = cv::boundingRect(contornos.at(i));
+//        float centro = frame.cols / 2;
+//        if ((rectAux.x >= centro - (frame.cols / 4)) && (rectAux.x <= centro + (frame.cols / 4)))
+//            newContours.push_back(contornos.at(i));
+//    }
+//    return newContours;
+//}
 
-//FILTRO 5
+////FILTRO 5
 
-vector<vector<Point> > filtroOrdenacion(vector<vector<Point> > contours) {
-    vector<vector<Point> > newContours;
-    std::vector<int> equises;
-    for (int i = 0; i < contours.size(); ++i) {
-        equises.push_back(cv::boundingRect(contours.at(i)).x);
-    }
-    std::sort(equises.begin(), equises.end());
-    for (int i = 0; i < equises.size(); ++i) {
-        for (int j = 0; j < contours.size(); j++) {
-            if (cv::boundingRect(contours.at(j)).x == equises.at(i))
-                newContours.push_back(contours.at(j));
-        }
-    }
-    return newContours;
-}
+//vector<vector<Point> > filtroOrdenacion(vector<vector<Point> > contours) {
+//    vector<vector<Point> > newContours;
+//    std::vector<int> equises;
+//    for (int i = 0; i < contours.size(); ++i) {
+//        equises.push_back(cv::boundingRect(contours.at(i)).x);
+//    }
+//    std::sort(equises.begin(), equises.end());
+//    for (int i = 0; i < equises.size(); ++i) {
+//        for (int j = 0; j < contours.size(); j++) {
+//            if (cv::boundingRect(contours.at(j)).x == equises.at(i))
+//                newContours.push_back(contours.at(j));
+//        }
+//    }
+//    return newContours;
+//}
 
-//METODO RESIZER: Convierte los dígitos a 10x10 manteniendo el ratio de aspecto
+//METODO RESIZER: Convierte los dígitos a tamanioResizextamanioResize manteniendo el ratio de aspecto
 
 cv::Mat_<float> resizer(cv::Mat binaryDigit){
 
     Size size;
     cv::Mat resizedDigit;
-    if (((binaryDigit.cols*10) / binaryDigit.rows) < 1)
-        size = Size (1, 10);
+    if (((binaryDigit.cols*tamanioResize) / binaryDigit.rows) < 1)
+        size = Size (1, tamanioResize);
     else
-        size = Size ((binaryDigit.cols * 10) / binaryDigit.rows, 10);
+        size = Size ((binaryDigit.cols * tamanioResize) / binaryDigit.rows, tamanioResize);
 
-    Size size2(10, 10);
+    Size size2(tamanioResize, tamanioResize);
 
     cv::resize(binaryDigit, resizedDigit, size, 0, 0, cv::INTER_LINEAR);
 
-    Point puntoOrigen((10 - resizedDigit.cols) / 2, 0);
+    Point puntoOrigen((tamanioResize - resizedDigit.cols) / 2, 0);
 
     Rect roi(puntoOrigen, Size(resizedDigit.cols, resizedDigit.rows));
 
@@ -166,7 +160,6 @@ cv::Mat_<float> resizer(cv::Mat binaryDigit){
     resizedDigit = matriz;
 
     return resizedDigit/255.0;
-
 }
 
 cv::Mat_<float> matrizAFila(cv::Mat_<float> floatMat){
@@ -180,125 +173,130 @@ cv::Mat_<float> matrizAFila(cv::Mat_<float> floatMat){
     return fila.t();
 }
 
-cv::Mat borrarBordes (cv::Mat digito){
-    int arriba=0;
-    int abajo=0;
-    int izq=0;
-    int der=0;
-    int col=0;
-    int row=0;
-    bool negro=false;
-    //cout << "Primer While" << endl;
-    while(!negro&&row<digito.rows){
-        uchar* p=digito.ptr(row);
-        while(!negro&&col<digito.cols){
-            if((int)*p==0){
-                negro=true;
-            }
-            p++;
-            ++col;
-        }
-        ++row;
-        col=0;
+//cv::Mat borrarBordes (cv::Mat digito){
+//    int arriba=0;
+//    int abajo=0;
+//    int izq=0;
+//    int der=0;
+//    int col=0;
+//    int row=0;
+//    bool negro=false;
+//    //cout << "Primer While" << endl;
+//    while(!negro&&row<digito.rows){
+//        uchar* p=digito.ptr(row);
+//        while(!negro&&col<digito.cols){
+//            if((int)*p==0){
+//                negro=true;
+//            }
+//            p++;
+//            ++col;
+//        }
+//        ++row;
+//        col=0;
 
-    }
-    if(negro){
-        arriba=row-1;
+//    }
+//    if(negro){
+//        arriba=row-1;
+//    }
+
+//    row=digito.rows-1;
+//    col=0;
+//    negro=false;
+//    while(!negro&&row>=0){
+//        uchar* p=digito.ptr(row);
+//        while(!negro&&col<digito.cols){
+//            if((int)*p==0){
+//                negro=true;
+//            }
+//            p++;
+//            ++col;
+//        }
+//        --row;
+//        col=0;
+//    }
+//    if(negro){
+//        abajo=row+1;
+//    }
+
+//    row = 0;
+//    col = 0;
+//    negro=false;
+//    uchar* p=digito.ptr(row);
+//    while(!negro&&col<digito.cols){
+//        while(!negro&&row<digito.rows){
+//            p=digito.ptr(row);
+//            p+=col;
+//            if((int)*p==0){
+//                negro=true;
+//            }
+//            ++row;
+//        }
+//        //p++;
+//        ++col;
+//        row = 0;
+//    }
+//    if(negro){
+//        izq=col-1;
+//    }
+
+//    row = 0;
+//    col = digito.cols-1;
+//    negro=false;
+//    p=digito.ptr(row);
+//    while(!negro&&col>=0){
+//        while(!negro&&row<digito.rows){
+//            p=digito.ptr(row);
+//            p+=col;
+//            if((int)*p==0)
+//            {
+//                negro=true;
+//            }
+//            ++row;
+//        }
+//        //p--;
+//        --col;
+//        row = 0;
+//    }
+//    if(negro){
+//        der=col+1;
+//    }
+
+//    digito = digito.rowRange(arriba, abajo);
+//    digito = digito.colRange(izq, der);
+//    return digito;
+
+//}
+
+int main(int argc, char **argv) {
+    if (argc != 1){
+        cout << "ERROR: Debe introducir la ruta de la imagen o vídeo a analizar" << endl;
+        exit (0);
     }
 
-    row=digito.rows-1;
-    col=0;
-    negro=false;
-    while(!negro&&row>=0){
-        uchar* p=digito.ptr(row);
-        while(!negro&&col<digito.cols){
-            if((int)*p==0){
-                negro=true;
-            }
-            p++;
-            ++col;
-        }
-        --row;
-        col=0;
-    }
-    if(negro){
-        abajo=row+1;
-    }
-
-    row = 0;
-    col = 0;
-    negro=false;
-    uchar* p=digito.ptr(row);
-    while(!negro&&col<digito.cols){
-        while(!negro&&row<digito.rows){
-            p=digito.ptr(row);
-            p+=col;
-            if((int)*p==0){
-                negro=true;
-            }
-            ++row;
-        }
-        //p++;
-        ++col;
-        row = 0;
-    }
-    if(negro){
-        izq=col-1;
-    }
-
-    row = 0;
-    col = digito.cols-1;
-    negro=false;
-    p=digito.ptr(row);
-    while(!negro&&col>=0){
-        while(!negro&&row<digito.rows){
-            p=digito.ptr(row);
-            p+=col;
-            if((int)*p==0)
-            {
-                negro=true;
-            }
-            ++row;
-        }
-        //p--;
-        --col;
-        row = 0;
-    }
-    if(negro){
-        der=col+1;
-    }
-
-    digito = digito.rowRange(arriba, abajo);
-    digito = digito.colRange(izq, der);
-    return digito;
-
-}
-
-int main() {
     string matricula;
-    string ruta;
+
     string ruta1;
     cv::Rect rectangulo;
     //ss << "/home/sergiofrrg/Documentos/OPENCV/training/frontal_" << i << ".jpg";
-    stringstream ss;
+    //stringstream ss;
     //Dirección de labSergio
     //ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << "1" << ".jpg";
-    ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/TestCars/Test/test" << "25" << ".jpg";
+    //ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/TestCars/Test/test" << "25" << ".jpg";
     //Dirección de labAza
     //ss << "/home/aza/Documentos/Universidad/VisionArtificial/EnunciadoP3/LearningCars/training_frontal/frontal_" << 17 << ".jpg";
-    ruta1 = ss.str();
+    ruta1 = argv[1];
 
     //////////////////////////////////////
     // APRENDIZAJE //////////////////////
     /////////////////////////////////////
 
     //PARTE 2 //////////////////////////////////////////////////////////////////////////////////
+    string ruta;
     cv::Mat_<uchar> digito;
     string clases [37] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "ESP", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
     vector<string> e;
     vector<int> eNteros;
     cv::Mat_<float> mCaracteristicas;
-    //Cargamos los '1' como prueba
 
     int nClase = 0;
 
@@ -310,7 +308,7 @@ int main() {
         if (aux == 0)
             aux = 250;
 
-        ss << "/home/sferrer/Documentos/VisionArtificial/EnunciadoP4/Digitos/" << clases[nClase] << "_" << aux << ".jpg";
+        ss << "Digitos/" << clases[nClase] << "_" << aux << ".jpg";
 
         ruta = ss.str();
         digito = cv::imread(ruta, 0);
@@ -319,25 +317,12 @@ int main() {
         cv::Mat binaryDigit(digito.size(), digito.type());
 
         //Apply thresholding
-
-        //cv::adaptiveThreshold(digito, binaryDigit, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 15, 10);
         cv::threshold(digito, binaryDigit, 200, 255, cv::THRESH_BINARY);
 
-       // cout << "Borro bordes del digito " << i << " de alto " << binaryDigit.rows << " y ancho " << binaryDigit.cols << endl;
-        //binaryDigit=borrarBordes(binaryDigit.clone());
-        //cout << "Borrado OK. Tamaño: " << binaryDigit.cols << "x" << binaryDigit.rows << endl;
+        binaryDigit=Filtro::borrarBordes(binaryDigit.clone());
 
-        //imshow("",binaryDigit);
-        //waitKey(0);
-
-        //Se reescala la imagen del dígito a 10x10
+        //Se reescala la imagen del dígito a tamanioResizextamanioResize
         cv::Mat_<float> floatMat = resizer(binaryDigit);
-        //cout << "despues del resizer" << endl;
-
-//                        imshow("",floatMat);
-//                        waitKey(0);
-
-        //Convertir las imágenes a matrices de 1x100 con el matrizAFila e introducirlas en mCaracteristicas para crear el LDA
 
         e.push_back(clases[nClase]);
         eNteros.push_back(nClase);
@@ -362,11 +347,7 @@ int main() {
     ///////////////////////////////////////////////////////
     // TESTING
     ///////////////////////////////////////////////////////
-
-    //AQUI COMIENZA LO DEL HAAR
-
-    //string direccion = "/home/sferrer/Documentos/Videos/video2.wmv";
-    string direccion = "/home/sferrer/Documentos/VisionArtificial/EnunciadoP3/TestCars/Test/test15.jpg";
+    string direccion = ruta1;
     cv::VideoCapture vCap(direccion);
     cv::Mat frame;
     //cv::Mat frame=cv::imread(ruta1, CV_LOAD_IMAGE_COLOR);
@@ -383,13 +364,9 @@ int main() {
         while (true) {
             vCap.read(frame);
 
-
             if (!frame.empty()) {
                 rectangulo = detectAndDisplay(frame);
                 if (!rectangulo.area() == 0) {
-                    //Our color image
-                    //   cv::Rect  rect(rectangulo.x, rectangulo.y,rectangulo.x+rectangulo.width, rectangulo.y+rectangulo.height);
-                    //   cv::Mat imageMat  (frame(rect));
 
                     frame = frame.rowRange(rectangulo.y + rectangulo.height / 2, rectangulo.y + rectangulo.height);
                     frame = frame.colRange(rectangulo.x, rectangulo.x + rectangulo.width);
@@ -408,47 +385,24 @@ int main() {
                     cv::Mat binaryMat(grayscaleMat.size(), grayscaleMat.type());
 
                     //Apply thresholding
-                    //cv::threshold(grayscaleMat, binaryMat, 128, 255, cv::THRESH_BINARY);
                     cv::adaptiveThreshold(grayscaleMat, binaryMat, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 9, 10);
-                    //Imagen del coche binarizada
 
                     cv::Mat imagenUmbralizadaCopia = binaryMat.clone();
 
                     vector<vector<Point> > contours;
                     vector<cv::Vec4i> hierarchy;
 
-
-
-                    /// Find contours
                     findContours(binaryMat, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0));
                     vector<vector<Point> > newContours;
 
-
                     //PASAMOS LOS FILTROS
-                    newContours = filtroArea(contours, frame);
-                    newContours = filtroProporcion(newContours);
-                    newContours = filtroSeparacion(newContours, frame);
-                    newContours = filtroPosicion(newContours, frame);
-                    newContours = filtroOrdenacion(newContours);
+                    newContours = Filtro::filtroArea(contours, frame);
+                    newContours = Filtro::filtroProporcion(newContours);
+                    newContours = Filtro::filtroSeparacion(newContours, frame);
+                    newContours = Filtro::filtroPosicion(newContours, frame);
+                    newContours = Filtro::filtroOrdenacion(newContours);
 
                     cout << "Número de contornos final: " << newContours.size() << endl;
-
-
-                    /// Draw contours
-//                    Mat drawing = Mat::zeros(binaryMat.size(), CV_8UC3);
-//                    for (int i = 0; i < newContours.size(); i++) {
-//                        Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
-//                        drawContours(drawing, newContours, i, color, 2, 8, hierarchy, 0, Point());
-//                    }
-
-                    /// Show in a window
-
-                    //namedWindow( "Contours", CV_WINDOW_AUTOSIZE );      //Se dibujan los contornos encontrados
-                    //imshow( "Contours", drawing );
-
-                    //cv::waitKey(0);
-
-
 
                     for (int j = 0; j < newContours.size(); ++j) {
 
@@ -491,33 +445,17 @@ int main() {
 
                     }
 
-                    cv::Point pt1;
-
-                    //cv::InitFont( &font, CV_FONT_VECTOR0, 0.5, 0.5, 0, 2.0, CV_AA);	//Inicializamos el código fuente
-
-                    pt1.x = 100;
-
-                    pt1.y = 100;
-
-                    cv::Mat foticuen = cv::imread(ruta1, CV_LOAD_IMAGE_COLOR);
-
-                    cv::putText(foticuen, matricula, pt1, 2, 3, 255);
-
-                    //cv::imshow("Ejemplo5", foticuen );
-                    //cv::waitKey(0);
-
                     string aux = matricula;
 
                     cout << "Matricula encontrada: " << aux << endl << "--------------------------------------" << endl;
-
                     matricula = "";
                     waitKey(0);
 
                 } else {
-                    cout << "--(!) No car detected" << endl << "--------------------------------------" << endl;
+                    cout << "--(!) No se han detectado coches" << endl << "--------------------------------------" << endl;
                 }
             } else {
-                cout << " --(!) No captured frame -- Break!" << endl;
+                cout << " --(!) No se encuentran más imágenes o frames -- Break!" << endl;
                 break;
             }
 

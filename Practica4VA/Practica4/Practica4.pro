@@ -5,7 +5,8 @@ CONFIG -= qt
 SOURCES += main.cpp \
     subspace.cpp \
     decomposition.cpp \
-    helper.cpp
+    helper.cpp \
+    filtro.cpp
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../usr/local/lib/release/ -lopencv_core
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../usr/local/lib/debug/ -lopencv_core
@@ -75,4 +76,5 @@ DEPENDPATH += $$PWD/../../../../../usr/local/include
 HEADERS += \
     subspace.hpp \
     decomposition.hpp \
-    helper.hpp
+    helper.hpp \
+    filtro.h
