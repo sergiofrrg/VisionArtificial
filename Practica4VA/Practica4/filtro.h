@@ -15,15 +15,18 @@
 #include <list>
 #include <string.h>
 
+using namespace std;
+using namespace cv;
+
 class Filtro
 {
 public:
     Filtro();
-    cv::vector<vector<Point> > filtroArea(vector<vector<Point> > contours, cv::Mat frame);
-    cv::vector<vector<Point> > filtroProporcion(vector<vector<Point> > contours);
-    cv::vector<vector<Point> > filtroSeparacion(vector<vector<Point> > contornos, cv::Mat frame);
-    cv::vector<vector<Point> > filtroPosicion(vector<vector<Point> > contornos, cv::Mat frame);
-    cv::vector<vector<Point> > filtroOrdenacion(vector<vector<Point> > contours);
+    vector<vector<Point> > filtroArea(vector<vector<Point> > contours, cv::Mat frame, int minimoArea, int maximoArea);
+    vector<vector<Point> > filtroProporcion(vector<vector<Point> > contours);
+    vector<vector<Point> > filtroSeparacion(vector<vector<Point> > contornos, cv::Mat frame);
+    vector<vector<Point> > filtroPosicion(vector<vector<Point> > contornos, cv::Mat frame);
+    vector<vector<Point> > filtroOrdenacion(vector<vector<Point> > contours);
     cv::Mat borrarBordes (cv::Mat digito);
 };
 

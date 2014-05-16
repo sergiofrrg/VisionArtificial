@@ -13,11 +13,14 @@
 #include <list>
 #include <string.h>
 
+using namespace std;
+using namespace cv;
+
 Filtro::Filtro()
 {
 }
 
-cv::vector<vector<Point> > filtroArea(vector<vector<Point> > contours, cv::Mat frame) {
+vector<vector<Point> > filtroArea(vector<vector<Point> > contours, cv::Mat frame, int minimoArea, int maximoArea) {
     // 1er filtro: descartamos caracteres por su area
     vector<vector<Point> > newContours;
     for (int i = 0; i < contours.size(); ++i) {
@@ -29,7 +32,7 @@ cv::vector<vector<Point> > filtroArea(vector<vector<Point> > contours, cv::Mat f
 }
 
 
-cv::vector<vector<Point> > filtroProporcion(vector<vector<Point> > contours) {
+vector<vector<Point> > filtroProporcion(vector<vector<Point> > contours) {
     vector<vector<Point> > newContours;
     for (int i = 0; i < contours.size(); ++i) {
         if ((cv::boundingRect(contours.at(i)).height) > (cv::boundingRect(contours.at(i)).width))
@@ -39,7 +42,7 @@ cv::vector<vector<Point> > filtroProporcion(vector<vector<Point> > contours) {
     return newContours;
 }
 
-cv::vector<vector<Point> > filtroSeparacion(vector<vector<Point> > contornos, cv::Mat frame) {
+vector<vector<Point> > filtroSeparacion(vector<vector<Point> > contornos, cv::Mat frame) {
     vector<vector<Point> > newContours;
     for (int i = 0; i < contornos.size(); i++) {
         cv::Rect rectAux = cv::boundingRect(contornos.at(i));
@@ -54,7 +57,7 @@ cv::vector<vector<Point> > filtroSeparacion(vector<vector<Point> > contornos, cv
     return newContours;
 }
 
-cv::vector<vector<Point> > filtroPosicion(vector<vector<Point> > contornos, cv::Mat frame) {
+vector<vector<Point> > filtroPosicion(vector<vector<Point> > contornos, cv::Mat frame) {
     vector<vector<Point> > newContours;
     for (int i = 0; i < contornos.size(); i++) {
         cv::Rect rectAux = cv::boundingRect(contornos.at(i));
@@ -65,7 +68,7 @@ cv::vector<vector<Point> > filtroPosicion(vector<vector<Point> > contornos, cv::
     return newContours;
 }
 
-cv::vector<vector<Point> > filtroOrdenacion(vector<vector<Point> > contours) {
+vector<vector<Point> > filtroOrdenacion(vector<vector<Point> > contours) {
     vector<vector<Point> > newContours;
     std::vector<int> equises;
     for (int i = 0; i < contours.size(); ++i) {

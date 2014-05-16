@@ -28,6 +28,7 @@ cv::CascadeClassifier car_cascade;
 const float minimoArea = 105.0 / 24893.0;
 const float maximoArea = 300.0 / 24893.0;
 const int tamanioResize=10;
+Filtro filtro ();
 
 Rect detectAndDisplay(cv::Mat frame) {
     std::vector<Rect> cars;
@@ -272,7 +273,7 @@ int main(int argc, char **argv) {
         cout << "ERROR: Debe introducir la ruta de la imagen o vídeo a analizar" << endl;
         exit (0);
     }
-
+    Filtro filtro;
     string matricula;
 
     string ruta1;
@@ -319,7 +320,7 @@ int main(int argc, char **argv) {
         //Apply thresholding
         cv::threshold(digito, binaryDigit, 200, 255, cv::THRESH_BINARY);
 
-        binaryDigit=Filtro::borrarBordes(binaryDigit.clone());
+        binaryDigit=filtro.borrarBordes(binaryDigit.clone());
 
         //Se reescala la imagen del dígito a tamanioResizextamanioResize
         cv::Mat_<float> floatMat = resizer(binaryDigit);
@@ -396,11 +397,11 @@ int main(int argc, char **argv) {
                     vector<vector<Point> > newContours;
 
                     //PASAMOS LOS FILTROS
-                    newContours = Filtro::filtroArea(contours, frame);
-                    newContours = Filtro::filtroProporcion(newContours);
-                    newContours = Filtro::filtroSeparacion(newContours, frame);
-                    newContours = Filtro::filtroPosicion(newContours, frame);
-                    newContours = Filtro::filtroOrdenacion(newContours);
+                    newContours = filtro.filtroArea(contours, frame, minimoArea, maximoArea);
+                    newContours = filtro.filtroProporcion(newContours);
+                    newContours = filtro.filtroSeparacion(newContours, frame);
+                    newContours = filtro.filtroPosicion(newContours, frame);
+                    newContours = filtro.filtroOrdenacion(newContours);
 
                     cout << "Número de contornos final: " << newContours.size() << endl;
 
