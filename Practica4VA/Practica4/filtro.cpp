@@ -20,7 +20,7 @@ Filtro::Filtro()
 {
 }
 
-vector<vector<Point> > filtroArea(vector<vector<Point> > contours, cv::Mat frame, int minimoArea, int maximoArea) {
+vector<vector<Point> >Filtro::filtroArea(vector<vector<Point> > contours, cv::Mat frame, float minimoArea, float maximoArea) {
     // 1er filtro: descartamos caracteres por su area
     vector<vector<Point> > newContours;
     for (int i = 0; i < contours.size(); ++i) {
@@ -32,7 +32,7 @@ vector<vector<Point> > filtroArea(vector<vector<Point> > contours, cv::Mat frame
 }
 
 
-vector<vector<Point> > filtroProporcion(vector<vector<Point> > contours) {
+vector<vector<Point> >Filtro::filtroProporcion(vector<vector<Point> > contours) {
     vector<vector<Point> > newContours;
     for (int i = 0; i < contours.size(); ++i) {
         if ((cv::boundingRect(contours.at(i)).height) > (cv::boundingRect(contours.at(i)).width))
@@ -42,7 +42,7 @@ vector<vector<Point> > filtroProporcion(vector<vector<Point> > contours) {
     return newContours;
 }
 
-vector<vector<Point> > filtroSeparacion(vector<vector<Point> > contornos, cv::Mat frame) {
+vector<vector<Point> >Filtro::filtroSeparacion(vector<vector<Point> > contornos, cv::Mat frame) {
     vector<vector<Point> > newContours;
     for (int i = 0; i < contornos.size(); i++) {
         cv::Rect rectAux = cv::boundingRect(contornos.at(i));
@@ -57,7 +57,7 @@ vector<vector<Point> > filtroSeparacion(vector<vector<Point> > contornos, cv::Ma
     return newContours;
 }
 
-vector<vector<Point> > filtroPosicion(vector<vector<Point> > contornos, cv::Mat frame) {
+vector<vector<Point> >Filtro::filtroPosicion(vector<vector<Point> > contornos, cv::Mat frame) {
     vector<vector<Point> > newContours;
     for (int i = 0; i < contornos.size(); i++) {
         cv::Rect rectAux = cv::boundingRect(contornos.at(i));
@@ -68,7 +68,7 @@ vector<vector<Point> > filtroPosicion(vector<vector<Point> > contornos, cv::Mat 
     return newContours;
 }
 
-vector<vector<Point> > filtroOrdenacion(vector<vector<Point> > contours) {
+vector<vector<Point> >Filtro::filtroOrdenacion(vector<vector<Point> > contours) {
     vector<vector<Point> > newContours;
     std::vector<int> equises;
     for (int i = 0; i < contours.size(); ++i) {
@@ -84,7 +84,7 @@ vector<vector<Point> > filtroOrdenacion(vector<vector<Point> > contours) {
     return newContours;
 }
 
-cv::Mat borrarBordes (cv::Mat digito){
+cv::Mat Filtro::borrarBordes (cv::Mat digito){
     int arriba=0;
     int abajo=0;
     int izq=0;

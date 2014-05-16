@@ -22,7 +22,7 @@ class Filtro
 {
 public:
     Filtro();
-    vector<vector<Point> > filtroArea(vector<vector<Point> > contours, cv::Mat frame, int minimoArea, int maximoArea);
+    vector<vector<Point> > filtroArea(vector<vector<Point> > contours, cv::Mat frame, float minimoArea, float maximoArea);
     vector<vector<Point> > filtroProporcion(vector<vector<Point> > contours);
     vector<vector<Point> > filtroSeparacion(vector<vector<Point> > contornos, cv::Mat frame);
     vector<vector<Point> > filtroPosicion(vector<vector<Point> > contornos, cv::Mat frame);
